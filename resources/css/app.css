@@ -1,0 +1,114 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Sora:wght@400;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        color-scheme: dark;
+    }
+
+    body {
+        @apply text-slate-100;
+        font-family: 'Space Grotesk', sans-serif;
+        background-color: #050816;
+        background-image:
+            radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 28%),
+            radial-gradient(circle at 82% 12%, rgba(163, 230, 53, 0.12), transparent 22%),
+            radial-gradient(circle at 50% 100%, rgba(15, 23, 42, 0.9), transparent 55%),
+            linear-gradient(180deg, #040713 0%, #07101d 45%, #040713 100%);
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: 'Sora', sans-serif;
+    }
+
+    ::selection {
+        @apply bg-lime-300 text-slate-950;
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+}
+
+@layer components {
+    .panel-dark {
+        @apply rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.9),rgba(10,15,30,0.82))] backdrop-blur-xl shadow-[0_28px_100px_rgba(0,0,0,0.42)];
+    }
+
+    .panel-soft {
+        @apply rounded-[26px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.03))] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)];
+    }
+
+    .panel-premium {
+        @apply rounded-[34px] border border-cyan-300/15 bg-[linear-gradient(145deg,rgba(10,18,34,0.96),rgba(15,23,42,0.76))] shadow-[0_34px_110px_rgba(0,0,0,0.48)];
+    }
+
+    .brand-badge {
+        @apply inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.34em] text-cyan-100;
+    }
+
+    .section-kicker {
+        @apply text-[11px] uppercase tracking-[0.32em] text-cyan-200;
+    }
+
+    .field-label {
+        @apply mb-2 block text-sm font-medium tracking-[0.02em] text-slate-300;
+    }
+
+    .field-input {
+        @apply w-full rounded-[22px] border border-white/10 bg-slate-950/70 px-4 py-3.5 text-sm text-white placeholder:text-slate-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition focus:border-cyan-300/60 focus:outline-none focus:ring-2 focus:ring-cyan-300/20;
+    }
+
+    .btn-primary {
+        @apply inline-flex items-center justify-center rounded-full bg-lime-300 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:-translate-y-0.5 hover:bg-lime-200 focus:outline-none focus:ring-2 focus:ring-lime-300/50 focus:ring-offset-2 focus:ring-offset-slate-950;
+    }
+
+    .btn-secondary {
+        @apply inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:border-cyan-300/30 hover:bg-white/10;
+    }
+
+    .metric-card {
+        @apply panel-soft p-5;
+    }
+
+    .metric-value {
+        @apply mt-3 text-3xl font-semibold text-white;
+    }
+
+    .nav-pill {
+        @apply rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:border-cyan-300/25 hover:bg-white/10 hover:text-white;
+    }
+
+    .nav-pill-active {
+        @apply rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_8px_24px_rgba(255,255,255,0.18)];
+    }
+
+    .ghost-pill {
+        @apply rounded-full border border-white/10 px-4 py-2.5 text-sm text-slate-500;
+    }
+
+    .stat-strip {
+        @apply flex items-center justify-between rounded-[24px] border border-white/10 bg-white/5 px-4 py-4;
+    }
+
+    .ticket-bubble-client {
+        @apply ml-auto max-w-3xl rounded-[28px] border border-cyan-300/20 bg-cyan-300/10 px-5 py-4;
+    }
+
+    .ticket-bubble-admin {
+        @apply mr-auto max-w-3xl rounded-[28px] border border-white/10 bg-white/5 px-5 py-4;
+    }
+
+    .surface-grid {
+        background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 24px 24px;
+    }
+}
