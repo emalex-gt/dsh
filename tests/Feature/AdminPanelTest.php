@@ -3,6 +3,9 @@
 namespace Tests\Feature;
 
 use App\Models\Brief;
+use App\Models\Budget;
+use App\Models\Demo;
+use App\Models\DemoCategory;
 use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -118,11 +121,75 @@ class AdminPanelTest extends TestCase
             'submitted_at' => now(),
         ]);
 
+        $category = DemoCategory::create([
+            'name' => 'Webs',
+        ]);
+
+        $recommendedDemo = Demo::create([
+            'demo_category_id' => $category->id,
+            'name' => 'Demo destacada',
+            'link' => 'https://demo.test/destacada',
+        ]);
+
+        $client->demos()->sync([
+            $recommendedDemo->id => ['is_recommended' => true],
+        ]);
+
         $this->actingAs($admin)
             ->get('/admin/clientes')
             ->assertOk()
             ->assertSee('Clientes')
             ->assertSee('Cliente Manual')
-            ->assertSee('Proyecto Manual');
+            ->assertSee('Proyecto Manual')
+            ->assertSee('Demo destacada');
+    }
+
+    public function test_admin_can_access_demo_resources(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $category = DemoCategory::create([
+            'name' => 'Webs',
+        ]);
+
+        Demo::create([
+            'demo_category_id' => $category->id,
+            'name' => 'Demo corporativa',
+            'link' => 'https://demo.test/corporativa',
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/admin/categorias-demos')
+            ->assertOk()
+            ->assertSee('Categorias demos')
+            ->assertSee('Webs');
+
+        $this->actingAs($admin)
+            ->get('/admin/demos')
+            ->assertOk()
+            ->assertSee('Demos')
+            ->assertSee('Demo corporativa');
+    }
+
+    public function test_admin_can_access_budgets_resource(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $client = User::factory()->create([
+            'name' => 'Cliente Facturacion',
+        ]);
+
+        Budget::create([
+            'user_id' => $client->id,
+            'title' => 'Presupuesto inicial',
+            'pdf_path' => 'budgets/demo.pdf',
+            'status' => 'pendiente',
+            'issued_at' => now(),
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/admin/budgets')
+            ->assertOk()
+            ->assertSee('Presupuestos')
+            ->assertSee('Presupuesto inicial')
+            ->assertSee('Cliente Facturacion');
     }
 }

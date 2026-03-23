@@ -21,7 +21,7 @@
                     <div class="metric-card">
                         <p class="section-kicker">Proyecto</p>
                         <p class="mt-3 text-2xl font-semibold text-white">Demo Proyecto</p>
-                        <p class="mt-2 text-sm leading-7 text-slate-400">Tu area esta preparada para concentrar datos, entregables y soporte en un mismo flujo.</p>
+                        <p class="mt-2 text-sm leading-7 text-slate-400">Tu area esta preparada para concentrar datos, demos, entregables y soporte en un mismo flujo.</p>
                     </div>
                 </div>
             </div>
@@ -30,7 +30,7 @@
 
     <div class="grid gap-6 lg:grid-cols-[1.18fr_0.82fr]">
         <section class="grid gap-6">
-            <div class="grid gap-6 md:grid-cols-3">
+            <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-5">
                 <article class="panel-premium p-6">
                     <p class="section-kicker">01</p>
                     <h2 class="mt-4 text-2xl font-semibold text-white">Mis datos</h2>
@@ -47,6 +47,20 @@
 
                 <article class="panel-premium p-6">
                     <p class="section-kicker">03</p>
+                    <h2 class="mt-4 text-2xl font-semibold text-white">Demo Proyecto</h2>
+                    <p class="mt-4 text-sm leading-7 text-slate-300">Accede a demos y referencias organizadas por categoria para revisar materiales compartidos por el equipo.</p>
+                    <a href="{{ route('client.demos.index') }}" class="btn-secondary mt-6">Abrir demos</a>
+                </article>
+
+                <article class="panel-premium p-6">
+                    <p class="section-kicker">04</p>
+                    <h2 class="mt-4 text-2xl font-semibold text-white">Facturacion</h2>
+                    <p class="mt-4 text-sm leading-7 text-slate-300">Consulta presupuestos en PDF y deja constancia de aprobacion desde tu area privada.</p>
+                    <a href="{{ route('client.budgets.index') }}" class="btn-secondary mt-6">Abrir facturacion</a>
+                </article>
+
+                <article class="panel-premium p-6">
+                    <p class="section-kicker">05</p>
                     <h2 class="mt-4 text-2xl font-semibold text-white">Soporte 24/7</h2>
                     <p class="mt-4 text-sm leading-7 text-slate-300">Crea tickets, sigue respuestas del equipo y mantén cada incidencia dentro de un hilo claro.</p>
                     <a href="{{ route('client.tickets.index') }}" class="btn-primary mt-6">Abrir soporte</a>
@@ -64,16 +78,21 @@
                     </a>
                 </div>
 
-                <div class="mt-8 grid gap-4 md:grid-cols-3">
+                <div class="mt-8 grid gap-4 md:grid-cols-4">
                     <div class="metric-card">
                         <p class="section-kicker">Brief</p>
                         <p class="mt-3 text-lg font-semibold text-white">Informacion alineada</p>
                         <p class="mt-2 text-sm leading-7 text-slate-400">Consulta siempre la base del proyecto sin depender de cadenas de mensajes.</p>
                     </div>
                     <div class="metric-card">
-                        <p class="section-kicker">Datos</p>
-                        <p class="mt-3 text-lg font-semibold text-white">Contexto del cliente</p>
-                        <p class="mt-2 text-sm leading-7 text-slate-400">Revisa rapidamente contacto, razon social y datos operativos principales.</p>
+                        <p class="section-kicker">Demos</p>
+                        <p class="mt-3 text-lg font-semibold text-white">Referencias a mano</p>
+                        <p class="mt-2 text-sm leading-7 text-slate-400">Consulta demos agrupadas por categoria desde una vista clara y directa.</p>
+                    </div>
+                    <div class="metric-card">
+                        <p class="section-kicker">Facturacion</p>
+                        <p class="mt-3 text-lg font-semibold text-white">Aprobacion trazable</p>
+                        <p class="mt-2 text-sm leading-7 text-slate-400">Revisa PDFs y aprueba presupuestos con constancia de fecha e identidad.</p>
                     </div>
                     <div class="metric-card">
                         <p class="section-kicker">Soporte</p>
@@ -112,6 +131,8 @@
                 <div class="mt-5 grid gap-3 text-sm text-slate-300">
                     <a href="{{ route('client.data.show') }}" class="panel-soft px-5 py-4 transition hover:bg-white/10">Abrir Mis Datos</a>
                     <a href="{{ route('client.brief.show') }}" class="panel-soft px-5 py-4 transition hover:bg-white/10">Revisar brief</a>
+                    <a href="{{ route('client.demos.index') }}" class="panel-soft px-5 py-4 transition hover:bg-white/10">Abrir Demo Proyecto</a>
+                    <a href="{{ route('client.budgets.index') }}" class="panel-soft px-5 py-4 transition hover:bg-white/10">Entrar a facturacion</a>
                     <a href="{{ route('client.tickets.index') }}" class="panel-soft px-5 py-4 transition hover:bg-white/10">Entrar a soporte</a>
                 </div>
             </div>

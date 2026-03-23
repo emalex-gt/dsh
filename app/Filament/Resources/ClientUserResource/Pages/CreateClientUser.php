@@ -16,4 +16,9 @@ class CreateClientUser extends CreateRecord
 
         return $data;
     }
+
+    protected function afterCreate(): void
+    {
+        ClientUserResource::syncClientDemos($this->record, $this->data);
+    }
 }

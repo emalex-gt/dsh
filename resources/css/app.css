@@ -111,4 +111,45 @@
         background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
         background-size: 24px 24px;
     }
+
+    .demo-preview-cluster {
+        @apply grid gap-4 sm:grid-cols-[1fr_180px];
+    }
+
+    .demo-preview-shell {
+        @apply overflow-hidden rounded-[24px] border border-white/10 bg-slate-950/80 shadow-[0_20px_60px_rgba(0,0,0,0.36)];
+    }
+
+    .demo-preview-shell-mobile {
+        @apply overflow-hidden rounded-[28px] border border-white/10 bg-slate-950/80 shadow-[0_20px_60px_rgba(0,0,0,0.36)];
+    }
+
+    .demo-preview-bar {
+        @apply flex items-center justify-between border-b border-white/10 bg-white/5 px-4 py-3;
+    }
+
+    .demo-preview-dots {
+        @apply flex items-center gap-2;
+    }
+
+    .demo-preview-dots span {
+        @apply h-2.5 w-2.5 rounded-full bg-white/30;
+    }
+
+    .demo-preview-frame-desktop {
+        @apply h-[260px] w-full bg-slate-950 md:h-[320px];
+    }
+
+    .demo-preview-frame-mobile {
+        @apply mx-auto h-[260px] w-[170px] bg-slate-950 md:h-[320px] md:w-[190px];
+    }
+
+    .demo-preview-frame-desktop img,
+    .demo-preview-frame-mobile img {
+        @apply h-full w-full object-cover object-top;
+    }
+
+    .demo-preview-placeholder {
+        @apply flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.16),transparent_30%),linear-gradient(180deg,rgba(15,23,42,0.88),rgba(2,6,23,0.98))] px-6 text-center text-sm leading-7 text-slate-400;
+    }
 }

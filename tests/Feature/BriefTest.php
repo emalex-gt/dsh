@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Brief;
+use App\Models\Demo;
+use App\Models\DemoCategory;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -91,6 +93,60 @@ class BriefTest extends TestCase
             ->assertSee('Datos base de tu cuenta y proyecto')
             ->assertSee('Proyecto Demo')
             ->assertSee('Ver Mi Brief');
+    }
+
+    public function test_client_can_view_direct_demo_without_general_demos(): void
+    {
+        $user = User::factory()->create([
+            'direct_demo_name' => 'Mockup exclusivo',
+            'direct_demo_link' => 'https://demo.test/directa',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('client.demos.index'))
+            ->assertOk()
+            ->assertSee('Demo directa')
+            ->assertSee('Mockup exclusivo')
+            ->assertSee('https://demo.test/directa');
+    }
+
+    public function test_client_can_view_only_assigned_demos_with_recommended_first(): void
+    {
+        $user = User::factory()->create();
+        $category = DemoCategory::create([
+            'name' => 'Landing pages',
+        ]);
+
+        $recommendedDemo = Demo::create([
+            'demo_category_id' => $category->id,
+            'name' => 'Demo principal',
+            'link' => 'https://demo.test/landing',
+        ]);
+
+        $secondaryDemo = Demo::create([
+            'demo_category_id' => $category->id,
+            'name' => 'Demo secundaria',
+            'link' => 'https://demo.test/secundaria',
+        ]);
+
+        $hiddenDemo = Demo::create([
+            'demo_category_id' => $category->id,
+            'name' => 'Demo oculta',
+            'link' => 'https://demo.test/oculta',
+        ]);
+
+        $user->demos()->sync([
+            $recommendedDemo->id => ['is_recommended' => true],
+            $secondaryDemo->id => ['is_recommended' => false],
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('client.demos.index'))
+            ->assertOk()
+            ->assertSee('Recomendada')
+            ->assertSee('Demo principal')
+            ->assertSee('Demo secundaria')
+            ->assertDontSee('Demo oculta');
     }
 
     private function validPayload(): array

@@ -13,8 +13,8 @@
                     <a href="{{ route('client.data.show') }}" class="{{ request()->routeIs('client.data.*') ? 'nav-pill-active' : 'nav-pill' }}">
                         Mis Datos
                     </a>
-                    <span class="ghost-pill">Demo Proyecto</span>
-                    <span class="ghost-pill">Facturacion</span>
+                    <a href="{{ route('client.demos.index') }}" class="{{ request()->routeIs('client.demos.*') ? 'nav-pill-active' : 'nav-pill' }}">Demo Proyecto</a>
+                    <a href="{{ route('client.budgets.index') }}" class="{{ request()->routeIs('client.budgets.*') ? 'nav-pill-active' : 'nav-pill' }}">Facturacion</a>
                     <span class="ghost-pill">Desarrollo</span>
                     <a href="{{ route('client.tickets.index') }}" class="{{ request()->routeIs('client.tickets.*') ? 'nav-pill-active' : 'nav-pill' }}">
                         Soporte 24/7
@@ -59,8 +59,8 @@
             <a href="{{ route('client.data.show') }}" class="block {{ request()->routeIs('client.data.*') ? 'nav-pill-active text-center' : 'nav-pill text-center' }}">
                 Mis Datos
             </a>
-            <span class="ghost-pill block text-center">Demo Proyecto</span>
-            <span class="ghost-pill block text-center">Facturacion</span>
+            <a href="{{ route('client.demos.index') }}" class="block {{ request()->routeIs('client.demos.*') ? 'nav-pill-active text-center' : 'nav-pill text-center' }}">Demo Proyecto</a>
+            <a href="{{ route('client.budgets.index') }}" class="block {{ request()->routeIs('client.budgets.*') ? 'nav-pill-active text-center' : 'nav-pill text-center' }}">Facturacion</a>
             <span class="ghost-pill block text-center">Desarrollo</span>
             <a href="{{ route('client.tickets.index') }}" class="block {{ request()->routeIs('client.tickets.*') ? 'nav-pill-active text-center' : 'nav-pill text-center' }}">
                 Soporte 24/7
@@ -85,3 +85,5 @@
         </div>
     </div>
 </nav>
+
+

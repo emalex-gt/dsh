@@ -3,17 +3,21 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ClientUserResource\Pages;
-use App\Models\Brief;
+use App\Models\Demo;
 use App\Models\User;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Validation\ValidationException;
 
 class ClientUserResource extends Resource
 {
@@ -88,6 +92,71 @@ class ClientUserResource extends Resource
             TextInput::make('city')
                 ->label('Ciudad')
                 ->maxLength(120),
+            TextInput::make('direct_demo_name')
+                ->label('Demo directa: nombre')
+                ->maxLength(255)
+                ->helperText('Opcional. Puedes usar esta demo personalizada sin asignar demos generales.'),
+            TextInput::make('direct_demo_link')
+                ->label('Demo directa: enlace')
+                ->url()
+                ->maxLength(2048),
+            FileUpload::make('direct_demo_desktop_image')
+                ->label('Demo directa: mockup escritorio')
+                ->image()
+                ->imageEditor()
+                ->directory('clients/direct-demos/desktop')
+                ->disk('public')
+                ->visibility('public')
+                ->columnSpanFull(),
+            FileUpload::make('direct_demo_mobile_image')
+                ->label('Demo directa: mockup movil')
+                ->image()
+                ->imageEditor()
+                ->directory('clients/direct-demos/mobile')
+                ->disk('public')
+                ->visibility('public')
+                ->columnSpanFull(),
+            Select::make('demo_ids')
+                ->label('Demos asignadas')
+                ->multiple()
+                ->preload()
+                ->searchable()
+                ->live()
+                ->options(fn (): array => Demo::query()
+                    ->with('category')
+                    ->orderBy('name')
+                    ->get()
+                    ->mapWithKeys(fn (Demo $demo): array => [
+                        $demo->id => ($demo->category?->name ? $demo->category->name.' / ' : '').$demo->name,
+                    ])
+                    ->all())
+                ->dehydrated(false)
+                ->helperText('Opcional. Si las asignas, tambien apareceran en Demo Proyecto para este cliente.')
+                ->columnSpanFull(),
+            Select::make('recommended_demo_id')
+                ->label('Demo recomendada')
+                ->preload()
+                ->searchable()
+                ->options(function (Get $get): array {
+                    $demoIds = collect($get('demo_ids') ?? [])->filter()->map(fn ($id) => (int) $id)->all();
+
+                    if ($demoIds === []) {
+                        return [];
+                    }
+
+                    return Demo::query()
+                        ->whereIn('id', $demoIds)
+                        ->with('category')
+                        ->orderBy('name')
+                        ->get()
+                        ->mapWithKeys(fn (Demo $demo): array => [
+                            $demo->id => ($demo->category?->name ? $demo->category->name.' / ' : '').$demo->name,
+                        ])
+                        ->all();
+                })
+                ->dehydrated(false)
+                ->helperText('Opcional. Si la defines, esa demo asignada se mostrara destacada al inicio.')
+                ->columnSpanFull(),
             Placeholder::make('brief_reference')
                 ->label('Brief asignado')
                 ->content(function (?User $record): string {
@@ -114,8 +183,8 @@ class ClientUserResource extends Resource
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query
                 ->where('is_admin', false)
-                ->with(['latestBrief'])
-                ->withCount('briefs')
+                ->with(['latestBrief', 'demos'])
+                ->withCount(['briefs', 'demos'])
                 ->latest('id'))
             ->columns([
                 TextColumn::make('name')
@@ -138,6 +207,22 @@ class ClientUserResource extends Resource
                     ->label('Briefs')
                     ->badge()
                     ->color(fn (int $state): string => $state > 0 ? 'success' : 'gray'),
+                TextColumn::make('demos_count')
+                    ->label('Demos')
+                    ->badge()
+                    ->color(fn (int $state): string => $state > 0 ? 'info' : 'gray'),
+                TextColumn::make('direct_demo_name')
+                    ->label('Demo directa')
+                    ->placeholder('Sin demo directa')
+                    ->toggleable(),
+                TextColumn::make('recommended_demo')
+                    ->label('Recomendada')
+                    ->state(function (User $record): string {
+                        $recommended = $record->demos->first(fn (Demo $demo) => (bool) $demo->pivot?->is_recommended);
+
+                        return $recommended?->name ?? 'Sin recomendada';
+                    })
+                    ->toggleable(),
                 TextColumn::make('latestBrief.status')
                     ->label('Estado brief')
                     ->badge()
@@ -188,7 +273,27 @@ class ClientUserResource extends Resource
     {
         return parent::getEloquentQuery()
             ->where('is_admin', false)
-            ->with(['latestBrief'])
-            ->withCount('briefs');
+            ->with(['latestBrief', 'demos'])
+            ->withCount(['briefs', 'demos']);
+    }
+
+    public static function syncClientDemos(User $user, array $data): void
+    {
+        $demoIds = collect($data['demo_ids'] ?? [])->filter()->map(fn ($id) => (int) $id)->unique()->values();
+        $recommendedDemoId = filled($data['recommended_demo_id'] ?? null) ? (int) $data['recommended_demo_id'] : null;
+
+        if ($recommendedDemoId !== null && ! $demoIds->contains($recommendedDemoId)) {
+            throw ValidationException::withMessages([
+                'recommended_demo_id' => 'La demo recomendada debe estar asignada al cliente.',
+            ]);
+        }
+
+        $syncData = $demoIds
+            ->mapWithKeys(fn (int $demoId): array => [
+                $demoId => ['is_recommended' => $recommendedDemoId === $demoId],
+            ])
+            ->all();
+
+        $user->demos()->sync($syncData);
     }
 }
