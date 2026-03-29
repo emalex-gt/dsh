@@ -67,6 +67,11 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(Budget::class);
     }
 
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
     public function latestBrief(): HasOne
     {
         return $this->hasOne(Brief::class)->latestOfMany();

@@ -9,7 +9,7 @@
                         Revisa el PDF completo y, si estas conforme, apruebalo desde este mismo panel.
                     </p>
                 </div>
-                <a href="{{ route('client.budgets.index') }}" class="btn-secondary">Volver a presupuestos</a>
+                <a href="{{ route('client.budgets.index') }}" class="btn-secondary">Volver a facturacion</a>
             </div>
         </div>
     </x-slot>
@@ -18,14 +18,14 @@
         <div class="rounded-[24px] border border-lime-300/20 bg-lime-300/10 px-4 py-3 text-sm font-medium text-lime-100">{{ session('status') }}</div>
     @endif
 
-    <div class="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-        <section class="panel-premium overflow-hidden p-3 sm:p-4">
+    <div class="grid gap-6">
+        <section class="panel-premium overflow-hidden p-2 sm:p-3">
             <div class="overflow-hidden rounded-[24px] border border-white/10 bg-white">
-                <iframe src="{{ route('client.budgets.file', $budget) }}" class="h-[75vh] w-full border-0" title="PDF de {{ $budget->title }}"></iframe>
+                <iframe src="{{ route('client.budgets.file', $budget) }}" class="h-[82vh] min-h-[760px] w-full border-0 xl:h-[88vh]" title="PDF de {{ $budget->title }}"></iframe>
             </div>
         </section>
 
-        <aside class="grid gap-6">
+        <aside class="grid gap-6 lg:grid-cols-2">
             <article class="panel-premium p-6">
                 <p class="section-kicker">Estado</p>
                 <div class="mt-5 space-y-4 text-sm">
@@ -40,6 +40,7 @@
                     <p class="section-kicker">Constancia</p>
                     <h2 class="mt-4 text-3xl font-semibold text-white">Presupuesto aprobado</h2>
                     <p class="mt-4 text-sm leading-8 text-slate-300">Este presupuesto fue aprobado digitalmente por {{ $budget->accepted_name }} el {{ optional($budget->accepted_at)->format('d/m/Y H:i') }}.</p>
+                    <p class="mt-4 text-sm leading-8 text-slate-300">Una vez aprobado deja de aparecer en pendientes y el seguimiento economico continuara desde la seccion de facturas emitidas.</p>
                     @if ($budget->client_notes)
                         <p class="mt-4 text-sm leading-8 text-slate-300">Observaciones: {{ $budget->client_notes }}</p>
                     @endif

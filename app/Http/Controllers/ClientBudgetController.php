@@ -14,10 +14,22 @@ class ClientBudgetController extends Controller
 {
     public function index(Request $request): View
     {
-        $budgets = $request->user()->budgets()->latest('issued_at')->latest('id')->get();
+        $budgets = $request->user()
+            ->budgets()
+            ->whereIn('status', ['pendiente', 'cambios_solicitados'])
+            ->latest('issued_at')
+            ->latest('id')
+            ->get();
+
+        $invoices = $request->user()
+            ->invoices()
+            ->latest('issued_at')
+            ->latest('id')
+            ->get();
 
         return view('client.budgets.index', [
             'budgets' => $budgets,
+            'invoices' => $invoices,
         ]);
     }
 
@@ -55,8 +67,8 @@ class ClientBudgetController extends Controller
         ]);
 
         return redirect()
-            ->route('client.budgets.show', $budget)
-            ->with('status', 'Presupuesto aprobado correctamente.');
+            ->route('client.budgets.index')
+            ->with('status', 'Presupuesto aprobado correctamente. A partir de ahora dejara de mostrarse en pendientes.');
     }
 
     public function requestChanges(BudgetDecisionRequest $request, Budget $budget): RedirectResponse

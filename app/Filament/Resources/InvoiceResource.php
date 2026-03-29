@@ -2,12 +2,11 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\BudgetResource\Pages;
-use App\Models\Budget;
+use App\Filament\Resources\InvoiceResource\Pages;
+use App\Models\Invoice;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -15,23 +14,22 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Storage;
 
-class BudgetResource extends Resource
+class InvoiceResource extends Resource
 {
-    protected static ?string $model = Budget::class;
+    protected static ?string $model = Invoice::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-banknotes';
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $navigationGroup = 'Facturacion';
 
-    protected static ?string $navigationLabel = 'Presupuestos';
+    protected static ?string $navigationLabel = 'Facturas';
 
-    protected static ?string $modelLabel = 'presupuesto';
+    protected static ?string $modelLabel = 'factura';
 
-    protected static ?string $pluralModelLabel = 'presupuestos';
+    protected static ?string $pluralModelLabel = 'facturas';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {
@@ -49,22 +47,28 @@ class BudgetResource extends Resource
             DateTimePicker::make('issued_at')
                 ->label('Fecha de emision')
                 ->seconds(false)
-                ->default(now()),
+                ->default(now())
+                ->required(),
+            Select::make('status')
+                ->label('Estado')
+                ->options(Invoice::statusOptions())
+                ->default('no_pagada')
+                ->required()
+                ->native(false)
+                ->live(),
+            DateTimePicker::make('paid_at')
+                ->label('Fecha de pago')
+                ->seconds(false)
+                ->visible(fn ($get) => $get('status') === 'pagada'),
             FileUpload::make('pdf_path')
-                ->label('PDF del presupuesto')
+                ->label('PDF de la factura')
                 ->acceptedFileTypes(['application/pdf'])
-                ->directory('budgets')
+                ->directory('invoices')
                 ->disk('local')
                 ->visibility('private')
                 ->downloadable()
                 ->openable()
                 ->required(),
-            Textarea::make('client_notes')
-                ->label('Observaciones del cliente')
-                ->rows(5)
-                ->disabled()
-                ->dehydrated(false)
-                ->columnSpanFull(),
         ])->columns(2);
     }
 
@@ -83,25 +87,14 @@ class BudgetResource extends Resource
                 TextColumn::make('status')
                     ->label('Estado')
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => Budget::statusOptions()[$state] ?? ucfirst($state))
-                    ->color(fn (string $state): string => match ($state) {
-                        'aprobado' => 'success',
-                        'cambios_solicitados' => 'danger',
-                        default => 'warning',
-                    }),
-                TextColumn::make('accepted_name')
-                    ->label('Respondido por')
-                    ->placeholder('-'),
-                TextColumn::make('client_notes')
-                    ->label('Observaciones')
-                    ->limit(40)
-                    ->toggleable(),
+                    ->formatStateUsing(fn (string $state): string => Invoice::statusOptions()[$state] ?? ucfirst($state))
+                    ->color(fn (string $state): string => $state === 'pagada' ? 'success' : 'warning'),
                 TextColumn::make('issued_at')
-                    ->label('Emitido')
+                    ->label('Emitida')
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
-                TextColumn::make('responded_at')
-                    ->label('Respondido')
+                TextColumn::make('paid_at')
+                    ->label('Pagada')
                     ->dateTime('d/m/Y H:i')
                     ->placeholder('-')
                     ->sortable(),
@@ -117,19 +110,10 @@ class BudgetResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListBudgets::route('/'),
-            'create' => Pages\CreateBudget::route('/crear'),
-            'edit' => Pages\EditBudget::route('/{record}/editar'),
+            'index' => Pages\ListInvoices::route('/'),
+            'create' => Pages\CreateInvoice::route('/crear'),
+            'edit' => Pages\EditInvoice::route('/{record}/editar'),
         ];
-    }
-
-    public static function mutateBudgetData(array $data): array
-    {
-        if (filled($data['pdf_path'] ?? null) && Storage::disk('local')->exists($data['pdf_path'])) {
-            $data['pdf_hash'] = hash_file('sha256', Storage::disk('local')->path($data['pdf_path']));
-        }
-
-        return $data;
     }
 }
 

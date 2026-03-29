@@ -3,6 +3,7 @@
 use App\Http\Controllers\ClientBriefController;
 use App\Http\Controllers\ClientBudgetController;
 use App\Http\Controllers\ClientDemoController;
+use App\Http\Controllers\ClientInvoiceController;
 use App\Http\Controllers\ClientTicketController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -30,6 +31,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/facturacion/{budget}/pdf', [ClientBudgetController::class, 'file'])->name('client.budgets.file');
     Route::post('/facturacion/{budget}/aceptar', [ClientBudgetController::class, 'accept'])->name('client.budgets.accept');
     Route::post('/facturacion/{budget}/solicitar-cambios', [ClientBudgetController::class, 'requestChanges'])->name('client.budgets.request-changes');
+    Route::get('/facturacion/facturas/{invoice}', [ClientInvoiceController::class, 'show'])->name('client.invoices.show');
+    Route::get('/facturacion/facturas/{invoice}/pdf', [ClientInvoiceController::class, 'file'])->name('client.invoices.file');
     Route::get('/soporte', [ClientTicketController::class, 'index'])->name('client.tickets.index');
     Route::get('/soporte/nuevo', [ClientTicketController::class, 'create'])->name('client.tickets.create');
     Route::post('/soporte', [ClientTicketController::class, 'store'])->name('client.tickets.store');

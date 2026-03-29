@@ -6,6 +6,7 @@ use App\Models\Brief;
 use App\Models\Budget;
 use App\Models\Demo;
 use App\Models\DemoCategory;
+use App\Models\Invoice;
 use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -191,5 +192,28 @@ class AdminPanelTest extends TestCase
             ->assertSee('Presupuestos')
             ->assertSee('Presupuesto inicial')
             ->assertSee('Cliente Facturacion');
+    }
+
+    public function test_admin_can_access_invoices_resource(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $client = User::factory()->create([
+            'name' => 'Cliente Facturas',
+        ]);
+
+        Invoice::create([
+            'user_id' => $client->id,
+            'title' => 'Factura marzo',
+            'pdf_path' => 'invoices/marzo.pdf',
+            'status' => 'no_pagada',
+            'issued_at' => now(),
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/admin/invoices')
+            ->assertOk()
+            ->assertSee('Facturas')
+            ->assertSee('Factura marzo')
+            ->assertSee('Cliente Facturas');
     }
 }

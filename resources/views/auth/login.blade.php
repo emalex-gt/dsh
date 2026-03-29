@@ -1,4 +1,4 @@
-<x-guest-layout>
+﻿<x-guest-layout>
     <div class="space-y-6">
         <div class="space-y-3">
             <span class="brand-badge">Ingreso privado</span>
@@ -6,6 +6,16 @@
             <p class="text-sm leading-7 text-slate-300">
                 Accede para revisar el estado de tu proyecto, consultar entregables y mantener la comunicacion con nuestro equipo.
             </p>
+        </div>
+
+        <div class="rounded-[28px] border border-cyan-300/20 bg-cyan-300/10 p-5">
+            <p class="text-xs uppercase tracking-[0.24em] text-cyan-200">Primera vez aqui</p>
+            <p class="mt-3 text-sm leading-7 text-slate-100">
+                Si todavia no tienes acceso, primero debes completar el brief para que nuestro equipo revise tu proyecto y pueda crear tu cuenta de cliente.
+            </p>
+            <a href="{{ route('brief.edit') }}" class="btn-secondary mt-4 inline-flex">
+                Completar brief
+            </a>
         </div>
 
         <x-auth-session-status class="mb-4" :status="session('status')" />
