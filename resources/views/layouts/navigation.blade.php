@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="px-4 pt-4 sm:px-6 lg:px-8">
+﻿<nav x-data="{ open: false }" class="px-4 pt-4 sm:px-6 lg:px-8">
     <div class="mx-auto max-w-7xl">
         <div class="panel-premium flex items-center justify-between px-4 py-4 sm:px-6">
             <div class="flex items-center gap-4 lg:gap-8">
@@ -15,7 +15,7 @@
                     </a>
                     <a href="{{ route('client.demos.index') }}" class="{{ request()->routeIs('client.demos.*') ? 'nav-pill-active' : 'nav-pill' }}">Demo Proyecto</a>
                     <a href="{{ route('client.budgets.index') }}" class="{{ request()->routeIs('client.budgets.*') ? 'nav-pill-active' : 'nav-pill' }}">Facturacion</a>
-                    <span class="ghost-pill">Desarrollo</span>
+                    <a href="{{ route('client.development.show') }}" class="{{ request()->routeIs('client.development.*') ? 'nav-pill-active' : 'nav-pill' }}">Desarrollo</a>
                     <a href="{{ route('client.tickets.index') }}" class="{{ request()->routeIs('client.tickets.*') ? 'nav-pill-active' : 'nav-pill' }}">
                         Soporte 24/7
                     </a>
@@ -61,7 +61,7 @@
             </a>
             <a href="{{ route('client.demos.index') }}" class="block {{ request()->routeIs('client.demos.*') ? 'nav-pill-active text-center' : 'nav-pill text-center' }}">Demo Proyecto</a>
             <a href="{{ route('client.budgets.index') }}" class="block {{ request()->routeIs('client.budgets.*') ? 'nav-pill-active text-center' : 'nav-pill text-center' }}">Facturacion</a>
-            <span class="ghost-pill block text-center">Desarrollo</span>
+            <a href="{{ route('client.development.show') }}" class="block {{ request()->routeIs('client.development.*') ? 'nav-pill-active text-center' : 'nav-pill text-center' }}">Desarrollo</a>
             <a href="{{ route('client.tickets.index') }}" class="block {{ request()->routeIs('client.tickets.*') ? 'nav-pill-active text-center' : 'nav-pill text-center' }}">
                 Soporte 24/7
             </a>
@@ -85,5 +85,6 @@
         </div>
     </div>
 </nav>
+
 
 

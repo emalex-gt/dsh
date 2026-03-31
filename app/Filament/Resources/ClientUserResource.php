@@ -5,9 +5,11 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ClientUserResource\Pages;
 use App\Models\Demo;
 use App\Models\User;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -92,6 +94,58 @@ class ClientUserResource extends Resource
             TextInput::make('city')
                 ->label('Ciudad')
                 ->maxLength(120),
+            TextInput::make('hosting_link')
+                ->label('Hosting: enlace de acceso')
+                ->url()
+                ->maxLength(2048),
+            TextInput::make('hosting_username')
+                ->label('Hosting: usuario')
+                ->maxLength(255),
+            TextInput::make('hosting_password')
+                ->label('Hosting: contrasena')
+                ->maxLength(255),
+            DatePicker::make('hosting_expires_at')
+                ->label('Hosting: fecha de vencimiento')
+                ->native(false),
+            TextInput::make('hosting_price')
+                ->label('Hosting: precio')
+                ->maxLength(255)
+                ->placeholder('Ej. 129 EUR / ano'),
+            DatePicker::make('domain_expires_at')
+                ->label('Dominio: fecha de vencimiento')
+                ->native(false),
+            TextInput::make('domain_price')
+                ->label('Dominio: precio')
+                ->maxLength(255)
+                ->placeholder('Ej. 18 EUR / ano'),
+            Repeater::make('emailAccounts')
+                ->label('Correos electronicos')
+                ->relationship()
+                ->schema([
+                    TextInput::make('label')
+                        ->label('Etiqueta')
+                        ->maxLength(255)
+                        ->placeholder('Ej. Soporte'),
+                    TextInput::make('email')
+                        ->label('Correo electronico')
+                        ->email()
+                        ->required()
+                        ->maxLength(255),
+                    TextInput::make('access_link')
+                        ->label('Enlace de acceso')
+                        ->url()
+                        ->maxLength(2048),
+                    TextInput::make('username')
+                        ->label('Usuario')
+                        ->maxLength(255),
+                    TextInput::make('password')
+                        ->label('Contrasena')
+                        ->maxLength(255),
+                ])
+                ->columnSpanFull()
+                ->defaultItems(0)
+                ->reorderable(false)
+                ->addActionLabel('Agregar correo'),
             TextInput::make('direct_demo_name')
                 ->label('Demo directa: nombre')
                 ->maxLength(255)

@@ -36,6 +36,13 @@ class User extends Authenticatable implements FilamentUser
         'direct_demo_link',
         'direct_demo_desktop_image',
         'direct_demo_mobile_image',
+        'hosting_link',
+        'hosting_username',
+        'hosting_password',
+        'hosting_expires_at',
+        'hosting_price',
+        'domain_expires_at',
+        'domain_price',
     ];
 
     protected $hidden = [
@@ -46,6 +53,7 @@ class User extends Authenticatable implements FilamentUser
     protected $appends = [
         'direct_demo_desktop_image_url',
         'direct_demo_mobile_image_url',
+        'development_expired_notifications',
     ];
 
     protected function casts(): array
@@ -54,6 +62,8 @@ class User extends Authenticatable implements FilamentUser
             'email_verified_at' => 'datetime',
             'is_admin' => 'boolean',
             'password' => 'hashed',
+            'hosting_expires_at' => 'date',
+            'domain_expires_at' => 'date',
         ];
     }
 
@@ -89,6 +99,16 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(Ticket::class);
     }
 
+    public function developmentRequests(): HasMany
+    {
+        return $this->hasMany(DevelopmentRequest::class);
+    }
+
+    public function emailAccounts(): HasMany
+    {
+        return $this->hasMany(ClientEmailAccount::class);
+    }
+
     public function getDirectDemoDesktopImageUrlAttribute(): ?string
     {
         if (blank($this->direct_demo_desktop_image)) {
@@ -105,6 +125,22 @@ class User extends Authenticatable implements FilamentUser
         }
 
         return Storage::disk('public')->url($this->direct_demo_mobile_image);
+    }
+
+    public function getDevelopmentExpiredNotificationsAttribute(): array
+    {
+        $notifications = [];
+        $today = now()->startOfDay();
+
+        if ($this->hosting_expires_at && $this->hosting_expires_at->copy()->startOfDay()->lt($today)) {
+            $notifications[] = 'El hosting de tu proyecto esta vencido desde el '.$this->hosting_expires_at->format('d/m/Y').'.';
+        }
+
+        if ($this->domain_expires_at && $this->domain_expires_at->copy()->startOfDay()->lt($today)) {
+            $notifications[] = 'El dominio de tu proyecto esta vencido desde el '.$this->domain_expires_at->format('d/m/Y').'.';
+        }
+
+        return $notifications;
     }
 
     public function canAccessPanel(Panel $panel): bool

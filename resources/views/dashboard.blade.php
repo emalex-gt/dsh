@@ -1,4 +1,4 @@
-<x-app-layout>
+ï»¿<x-app-layout>
     <x-slot name="header">
         <div class="panel-premium surface-grid overflow-hidden px-6 py-8 sm:px-8 lg:px-10">
             <div class="grid gap-8 lg:grid-cols-[1.25fr_0.75fr] lg:items-end">
@@ -30,7 +30,7 @@
 
     <div class="grid gap-6 lg:grid-cols-[1.18fr_0.82fr]">
         <section class="grid gap-6">
-            <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-5">
+            <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-6">
                 <article class="panel-premium p-6">
                     <p class="section-kicker">01</p>
                     <h2 class="mt-4 text-2xl font-semibold text-white">Mis datos</h2>
@@ -55,14 +55,21 @@
                 <article class="panel-premium p-6">
                     <p class="section-kicker">04</p>
                     <h2 class="mt-4 text-2xl font-semibold text-white">Facturacion</h2>
-                    <p class="mt-4 text-sm leading-7 text-slate-300">Consulta presupuestos en PDF y deja constancia de aprobacion desde tu area privada.</p>
+                    <p class="mt-4 text-sm leading-7 text-slate-300">Consulta presupuestos y facturas en PDF desde tu area privada.</p>
                     <a href="{{ route('client.budgets.index') }}" class="btn-secondary mt-6">Abrir facturacion</a>
                 </article>
 
                 <article class="panel-premium p-6">
                     <p class="section-kicker">05</p>
+                    <h2 class="mt-4 text-2xl font-semibold text-white">Desarrollo</h2>
+                    <p class="mt-4 text-sm leading-7 text-slate-300">Consulta accesos de hosting, renovacion de dominio y credenciales de correo asignadas a tu proyecto.</p>
+                    <a href="{{ route('client.development.show') }}" class="btn-secondary mt-6">Abrir desarrollo</a>
+                </article>
+
+                <article class="panel-premium p-6">
+                    <p class="section-kicker">06</p>
                     <h2 class="mt-4 text-2xl font-semibold text-white">Soporte 24/7</h2>
-                    <p class="mt-4 text-sm leading-7 text-slate-300">Crea tickets, sigue respuestas del equipo y mantén cada incidencia dentro de un hilo claro.</p>
+                    <p class="mt-4 text-sm leading-7 text-slate-300">Crea tickets, sigue respuestas del equipo y mantien cada incidencia dentro de un hilo claro.</p>
                     <a href="{{ route('client.tickets.index') }}" class="btn-primary mt-6">Abrir soporte</a>
                 </article>
             </div>
@@ -78,7 +85,7 @@
                     </a>
                 </div>
 
-                <div class="mt-8 grid gap-4 md:grid-cols-4">
+                <div class="mt-8 grid gap-4 md:grid-cols-5">
                     <div class="metric-card">
                         <p class="section-kicker">Brief</p>
                         <p class="mt-3 text-lg font-semibold text-white">Informacion alineada</p>
@@ -93,6 +100,11 @@
                         <p class="section-kicker">Facturacion</p>
                         <p class="mt-3 text-lg font-semibold text-white">Aprobacion trazable</p>
                         <p class="mt-2 text-sm leading-7 text-slate-400">Revisa PDFs y aprueba presupuestos con constancia de fecha e identidad.</p>
+                    </div>
+                    <div class="metric-card">
+                        <p class="section-kicker">Desarrollo</p>
+                        <p class="mt-3 text-lg font-semibold text-white">Accesos centralizados</p>
+                        <p class="mt-2 text-sm leading-7 text-slate-400">Consulta enlaces, credenciales y renovaciones tecnicas desde un mismo lugar.</p>
                     </div>
                     <div class="metric-card">
                         <p class="section-kicker">Soporte</p>
@@ -133,6 +145,7 @@
                     <a href="{{ route('client.brief.show') }}" class="panel-soft px-5 py-4 transition hover:bg-white/10">Revisar brief</a>
                     <a href="{{ route('client.demos.index') }}" class="panel-soft px-5 py-4 transition hover:bg-white/10">Abrir Demo Proyecto</a>
                     <a href="{{ route('client.budgets.index') }}" class="panel-soft px-5 py-4 transition hover:bg-white/10">Entrar a facturacion</a>
+                    <a href="{{ route('client.development.show') }}" class="panel-soft px-5 py-4 transition hover:bg-white/10">Entrar a desarrollo</a>
                     <a href="{{ route('client.tickets.index') }}" class="panel-soft px-5 py-4 transition hover:bg-white/10">Entrar a soporte</a>
                 </div>
             </div>

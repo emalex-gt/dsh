@@ -6,6 +6,7 @@ use App\Models\Brief;
 use App\Models\Budget;
 use App\Models\Demo;
 use App\Models\DemoCategory;
+use App\Models\DevelopmentRequest;
 use App\Models\Invoice;
 use App\Models\Ticket;
 use App\Models\User;
@@ -215,5 +216,28 @@ class AdminPanelTest extends TestCase
             ->assertSee('Facturas')
             ->assertSee('Factura marzo')
             ->assertSee('Cliente Facturas');
+    }
+
+    public function test_admin_can_access_development_requests_resource(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $client = User::factory()->create([
+            'name' => 'Cliente Desarrollo',
+        ]);
+
+        DevelopmentRequest::create([
+            'user_id' => $client->id,
+            'subject' => 'Ajuste de cabecera',
+            'priority' => 'alta',
+            'status' => 'abierto',
+            'last_message_at' => now(),
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/admin/development-requests')
+            ->assertOk()
+            ->assertSee('Edit Area')
+            ->assertSee('Ajuste de cabecera')
+            ->assertSee('Cliente Desarrollo');
     }
 }
