@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,7 +14,6 @@ use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable implements FilamentUser
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
     protected $fillable = [
@@ -41,6 +39,7 @@ class User extends Authenticatable implements FilamentUser
         'hosting_password',
         'hosting_expires_at',
         'hosting_price',
+        'domain_name',
         'domain_expires_at',
         'domain_price',
     ];
@@ -133,11 +132,25 @@ class User extends Authenticatable implements FilamentUser
         $today = now()->startOfDay();
 
         if ($this->hosting_expires_at && $this->hosting_expires_at->copy()->startOfDay()->lt($today)) {
-            $notifications[] = 'El hosting de tu proyecto esta vencido desde el '.$this->hosting_expires_at->format('d/m/Y').'.';
+            $notifications[] = [
+                'key' => 'hosting',
+                'title' => 'Hosting vencido',
+                'message' => 'El hosting de tu proyecto esta vencido desde el '.$this->hosting_expires_at->format('d/m/Y').'.',
+                'facturation_url' => route('client.budgets.index'),
+                'detail_url' => route('client.development.show', 'hosting'),
+                'detail_label' => 'Ver Hosting',
+            ];
         }
 
         if ($this->domain_expires_at && $this->domain_expires_at->copy()->startOfDay()->lt($today)) {
-            $notifications[] = 'El dominio de tu proyecto esta vencido desde el '.$this->domain_expires_at->format('d/m/Y').'.';
+            $notifications[] = [
+                'key' => 'dominio',
+                'title' => 'Dominio vencido',
+                'message' => 'El dominio de tu proyecto esta vencido desde el '.$this->domain_expires_at->format('d/m/Y').'.',
+                'facturation_url' => route('client.budgets.index'),
+                'detail_url' => route('client.development.show', 'dominio'),
+                'detail_label' => 'Ver Dominio',
+            ];
         }
 
         return $notifications;

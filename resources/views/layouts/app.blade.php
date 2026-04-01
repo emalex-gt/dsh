@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
@@ -7,7 +7,6 @@
 
         <title>{{ config('app.name', 'DSH Studio') }} | Panel de clientes</title>
 
-        <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="antialiased">
@@ -25,13 +24,21 @@
                 <div class="mx-auto max-w-7xl">
                     @auth
                         @if (count(auth()->user()->development_expired_notifications))
-                            <div class="alert-critical mb-6">
-                                <p class="alert-critical-kicker">Vencimiento detectado</p>
-                                <div class="mt-3 space-y-2">
-                                    @foreach (auth()->user()->development_expired_notifications as $notification)
-                                        <p>{{ $notification }}</p>
-                                    @endforeach
-                                </div>
+                            <div class="mb-6 grid gap-4">
+                                @foreach (auth()->user()->development_expired_notifications as $notification)
+                                    <div class="alert-critical">
+                                        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                                            <div>
+                                                <p class="alert-critical-kicker">{{ $notification['title'] }}</p>
+                                                <p class="mt-3 text-base font-medium text-white">{{ $notification['message'] }}</p>
+                                            </div>
+                                            <div class="flex flex-wrap gap-3">
+                                                <a href="{{ $notification['facturation_url'] }}" class="btn-primary">Ir a Facturacion</a>
+                                                <a href="{{ $notification['detail_url'] }}" class="btn-secondary">{{ $notification['detail_label'] }}</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
                         @endif
                     @endauth

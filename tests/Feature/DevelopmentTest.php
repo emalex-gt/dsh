@@ -40,6 +40,7 @@ class DevelopmentTest extends TestCase
             'hosting_password' => 'host-pass',
             'hosting_expires_at' => '2026-12-01',
             'hosting_price' => '129 EUR / ano',
+            'domain_name' => 'www.demo.test',
             'domain_expires_at' => '2026-11-20',
             'domain_price' => '18 EUR / ano',
         ]);
@@ -63,6 +64,7 @@ class DevelopmentTest extends TestCase
         $this->actingAs($user)
             ->get(route('client.development.show', 'dominio'))
             ->assertOk()
+            ->assertSee('www.demo.test')
             ->assertSee('18 EUR / ano');
 
         $this->actingAs($user)
@@ -119,6 +121,33 @@ class DevelopmentTest extends TestCase
             ->assertDontSee('Cambio invisible');
     }
 
+    public function test_edit_area_hides_finished_requests(): void
+    {
+        $user = User::factory()->create();
+
+        DevelopmentRequest::create([
+            'user_id' => $user->id,
+            'subject' => 'Solicitud abierta',
+            'priority' => 'media',
+            'status' => 'abierto',
+            'last_message_at' => now(),
+        ]);
+
+        DevelopmentRequest::create([
+            'user_id' => $user->id,
+            'subject' => 'Solicitud finalizada',
+            'priority' => 'alta',
+            'status' => 'finalizado',
+            'last_message_at' => now(),
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('client.development.requests.index'))
+            ->assertOk()
+            ->assertSee('Solicitud abierta')
+            ->assertDontSee('Solicitud finalizada');
+    }
+
     public function test_expired_hosting_and_domain_show_global_notifications(): void
     {
         $user = User::factory()->create([
@@ -130,6 +159,9 @@ class DevelopmentTest extends TestCase
             ->get(route('dashboard'))
             ->assertOk()
             ->assertSee('El hosting de tu proyecto esta vencido')
-            ->assertSee('El dominio de tu proyecto esta vencido');
+            ->assertSee('El dominio de tu proyecto esta vencido')
+            ->assertSee(route('client.budgets.index'))
+            ->assertSee(route('client.development.show', 'hosting'))
+            ->assertSee(route('client.development.show', 'dominio'));
     }
 }

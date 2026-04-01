@@ -1,4 +1,4 @@
-﻿<x-app-layout>
+<x-app-layout>
     <x-slot name="header">
         <div class="panel-premium surface-grid overflow-hidden px-6 py-8 sm:px-8 lg:px-10">
             <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
@@ -61,15 +61,16 @@
                 <p class="section-kicker">Dominio</p>
                 <h2 class="mt-4 text-3xl font-semibold text-white">Datos del dominio</h2>
 
-                @if (blank($user->domain_expires_at) && blank($user->domain_price))
+                @if (blank($user->domain_name) && blank($user->domain_expires_at) && blank($user->domain_price))
                     <p class="mt-6 rounded-[28px] border border-dashed border-white/10 bg-white/5 px-6 py-8 text-sm leading-8 text-slate-300">
                         No tiene asignado dominio.
                     </p>
                 @else
                     <div class="mt-8 grid gap-4 lg:grid-cols-2">
                         <div class="metric-card">
-                            <p class="section-kicker">Renovacion</p>
+                            <p class="section-kicker">Dominio</p>
                             <div class="mt-4 space-y-4 text-sm">
+                                <div class="stat-strip"><span class="text-slate-300">Nombre</span><span class="font-semibold text-white">{{ $user->domain_name ?: 'No definido' }}</span></div>
                                 <div class="stat-strip"><span class="text-slate-300">Vencimiento</span><span class="font-semibold text-white">{{ optional($user->domain_expires_at)->format('d/m/Y') ?: 'No definido' }}</span></div>
                                 <div class="stat-strip"><span class="text-slate-300">Precio</span><span class="font-semibold text-white">{{ $user->domain_price ?: 'No definido' }}</span></div>
                             </div>

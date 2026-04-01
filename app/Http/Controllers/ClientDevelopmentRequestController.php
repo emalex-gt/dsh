@@ -18,6 +18,7 @@ class ClientDevelopmentRequestController extends Controller
             'requests' => $request->user()
                 ->developmentRequests()
                 ->with(['messages' => fn ($query) => $query->where('is_internal', false)])
+                ->whereIn('status', ['abierto', 'en_progreso'])
                 ->latest('last_message_at')
                 ->latest('id')
                 ->get(),

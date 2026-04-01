@@ -111,6 +111,10 @@ class ClientUserResource extends Resource
                 ->label('Hosting: precio')
                 ->maxLength(255)
                 ->placeholder('Ej. 129 EUR / ano'),
+            TextInput::make('domain_name')
+                ->label('Dominio: nombre')
+                ->maxLength(255)
+                ->placeholder('Ej. www.dominio.com'),
             DatePicker::make('domain_expires_at')
                 ->label('Dominio: fecha de vencimiento')
                 ->native(false),
@@ -351,3 +355,5 @@ class ClientUserResource extends Resource
         $user->demos()->sync($syncData);
     }
 }
+
+
