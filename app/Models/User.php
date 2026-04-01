@@ -156,6 +156,23 @@ class User extends Authenticatable implements FilamentUser
         return $notifications;
     }
 
+    public static function formatPrice(?string $value): string
+    {
+        if (blank($value)) {
+            return 'No definido';
+        }
+
+        $normalized = trim(str_replace(['EUR', '€'], '', $value));
+
+        if (is_numeric($normalized)) {
+            return number_format((float) $normalized, 0, ',', '.').' €';
+        }
+
+        return str_contains($value, '€')
+            ? $value
+            : trim($normalized).' €';
+    }
+
     public function canAccessPanel(Panel $panel): bool
     {
         return $panel->getId() === 'admin' && $this->is_admin;

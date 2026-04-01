@@ -110,7 +110,7 @@ class ClientUserResource extends Resource
             TextInput::make('hosting_price')
                 ->label('Hosting: precio')
                 ->maxLength(255)
-                ->placeholder('Ej. 129 â‚¬ / ano'),
+                ->placeholder('Ej. 129 € / ano'),
             TextInput::make('domain_name')
                 ->label('Dominio: nombre')
                 ->maxLength(255)
@@ -121,7 +121,7 @@ class ClientUserResource extends Resource
             TextInput::make('domain_price')
                 ->label('Dominio: precio')
                 ->maxLength(255)
-                ->placeholder('Ej. 18 â‚¬ / ano'),
+                ->placeholder('Ej. 18 € / ano'),
             Repeater::make('emailAccounts')
                 ->label('Correos electronicos')
                 ->relationship()

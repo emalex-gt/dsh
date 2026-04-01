@@ -548,7 +548,7 @@ class BriefResource extends Resource
             return self::value($record, 'investment_budget');
         }
 
-        return number_format((float) $value, 0, ',', '.').' â‚¬';
+        return number_format((float) $value, 0, ',', '.').' €';
     }
 
     protected static function yesNo(Brief $record, string $key): string
