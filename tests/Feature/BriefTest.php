@@ -177,7 +177,7 @@ class BriefTest extends TestCase
             'average_age' => '30-45',
             'main_market' => 'Espana',
             'business_model' => 'B2B',
-            'average_ticket' => '1500 EUR',
+            'average_ticket' => '1500 €',
             'current_customer_acquisition' => 'Recomendaciones y anuncios',
             'selected_services' => ['web'],
             'web_pack' => 'FullWeb',
@@ -203,3 +203,4 @@ class BriefTest extends TestCase
         ];
     }
 }
+

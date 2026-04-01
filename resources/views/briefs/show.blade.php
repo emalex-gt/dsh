@@ -46,7 +46,7 @@
                     <div class="metric-card"><p class="section-kicker">Empresa</p><p class="mt-3 text-xl font-semibold text-white">{{ $value('brand_name', $value('legal_name')) }}</p><p class="mt-2 text-sm text-slate-400">{{ $value('legal_name') }}</p></div>
                     <div class="metric-card"><p class="section-kicker">Contacto</p><p class="mt-3 text-xl font-semibold text-white">{{ $value('contact_name') }}</p><p class="mt-2 text-sm text-slate-400">{{ $value('contact_email') }}</p></div>
                     <div class="metric-card"><p class="section-kicker">Servicios</p><p class="mt-3 text-xl font-semibold text-white">{{ $serviceLabels ?: '-' }}</p><p class="mt-2 text-sm text-slate-400">Alcance de referencia</p></div>
-                    <div class="metric-card"><p class="section-kicker">Presupuesto</p><p class="mt-3 text-xl font-semibold text-white">{{ is_numeric($value('investment_budget', null)) ? number_format((float) $value('investment_budget', 0), 0, ',', '.') . ' EUR' : $value('investment_budget') }}</p><p class="mt-2 text-sm text-slate-400">Base estimada</p></div>
+                    <div class="metric-card"><p class="section-kicker">Presupuesto</p><p class="mt-3 text-xl font-semibold text-white">{{ is_numeric($value('investment_budget', null)) ? number_format((float) $value('investment_budget', 0), 0, ',', '.') . ' €' : $value('investment_budget') }}</p><p class="mt-2 text-sm text-slate-400">Base estimada</p></div>
                 </div>
             </section>
 
@@ -59,4 +59,5 @@
         </div>
     @endif
 </x-app-layout>
+
 
