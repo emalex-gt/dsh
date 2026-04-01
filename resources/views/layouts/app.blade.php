@@ -25,8 +25,8 @@
                 <div class="mx-auto max-w-7xl">
                     @auth
                         @if (count(auth()->user()->development_expired_notifications))
-                            <div class="mb-6 rounded-[28px] border border-rose-400/25 bg-rose-500/10 px-5 py-4 text-sm text-rose-50">
-                                <p class="text-xs uppercase tracking-[0.24em] text-rose-200">Notificacion importante</p>
+                            <div class="alert-critical mb-6">
+                                <p class="alert-critical-kicker">Vencimiento detectado</p>
                                 <div class="mt-3 space-y-2">
                                     @foreach (auth()->user()->development_expired_notifications as $notification)
                                         <p>{{ $notification }}</p>
@@ -42,4 +42,3 @@
         </div>
     </body>
 </html>
-
