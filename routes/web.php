@@ -8,6 +8,7 @@ use App\Http\Controllers\ClientDemoController;
 use App\Http\Controllers\ClientInvoiceController;
 use App\Http\Controllers\ClientTicketController;
 use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -23,6 +24,24 @@ Route::get('/dashboard', function () {
 Route::get('/brief', [ClientBriefController::class, 'edit'])->name('brief.edit');
 Route::post('/brief', [ClientBriefController::class, 'update'])->name('brief.update');
 Route::get('/brief/gracias', [ClientBriefController::class, 'thanks'])->name('brief.thanks');
+
+Route::get('/_ops/clear', function () {
+    $token = request('token');
+
+    abort_unless(
+        is_string($token) && filled(env('OPS_CLEAR_TOKEN')) && hash_equals((string) env('OPS_CLEAR_TOKEN'), $token),
+        403
+    );
+
+    Artisan::call('optimize:clear');
+    Artisan::call('config:clear');
+    Artisan::call('cache:clear');
+    Artisan::call('route:clear');
+    Artisan::call('view:clear');
+
+    return response('Caches limpiadas correctamente.', 200)
+        ->header('Content-Type', 'text/plain; charset=UTF-8');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/mis-datos', [ClientBriefController::class, 'showClientData'])->name('client.data.show');
