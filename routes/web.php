@@ -10,6 +10,7 @@ use App\Http\Controllers\ClientTicketController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 
 Route::get('/', function () {
     return auth()->check()
@@ -24,6 +25,15 @@ Route::get('/dashboard', function () {
 Route::get('/brief', [ClientBriefController::class, 'edit'])->name('brief.edit');
 Route::post('/brief', [ClientBriefController::class, 'update'])->name('brief.update');
 Route::get('/brief/gracias', [ClientBriefController::class, 'thanks'])->name('brief.thanks');
+Route::get('/session/refresh', function (Request $request) {
+    $request->session()->start();
+    $request->session()->regenerateToken();
+
+    return response()->json([
+        'token' => csrf_token(),
+        'expires_in_minutes' => (int) config('session.lifetime'),
+    ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+})->name('session.refresh');
 
 Route::get('/_ops/clear', function () {
     $token = request('token');

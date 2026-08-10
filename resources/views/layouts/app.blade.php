@@ -47,5 +47,7 @@
                 </div>
             </main>
         </div>
+
+        @include('layouts.partials.session-refresh-script')
     </body>
 </html>

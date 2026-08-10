@@ -85,5 +85,7 @@
                 </div>
             </div>
         @endif
+
+        @include('layouts.partials.session-refresh-script')
     </body>
 </html>
