@@ -38,6 +38,14 @@ class BriefTest extends TestCase
         ]);
     }
 
+    public function test_guest_can_submit_brief_without_hidden_sections(): void
+    {
+        $response = $this->post('/brief', $this->validPayloadWithoutHiddenSections());
+
+        $response->assertRedirect(route('brief.thanks'));
+        $this->assertDatabaseCount('briefs', 1);
+    }
+
     public function test_guest_can_view_brief_thanks_page(): void
     {
         $this->get(route('brief.thanks'))
@@ -76,7 +84,7 @@ class BriefTest extends TestCase
         $this->actingAs($user)
             ->get(route('client.brief.show'))
             ->assertOk()
-            ->assertSee('Informacion base de tu proyecto')
+            ->assertSee('Aqui tienes la version consolidada de la informacion compartida para tu proyecto.')
             ->assertSee('Demo Privado');
     }
 
@@ -162,23 +170,6 @@ class BriefTest extends TestCase
             'contact_role' => 'CEO',
             'contact_email' => 'cliente@demo.test',
             'contact_phone' => '+34123456789',
-            'eu_registered' => 'si',
-            'vat_number' => 'ESB12345678',
-            'fiscal_name' => 'Empresa Demo SL',
-            'fiscal_address' => 'Calle Principal 123',
-            'fiscal_postal_code' => '28001',
-            'fiscal_country' => 'Espana',
-            'commercial_registry_number' => 'RM-123',
-            'billing_type' => 'B2B',
-            'intracommunity_invoice' => 'si',
-            'project_objectives' => ['Generar ventas'],
-            'results_timeframe' => '3-6 meses',
-            'ideal_customer' => 'Empresas medianas del sector servicios',
-            'average_age' => '30-45',
-            'main_market' => 'Espana',
-            'business_model' => 'B2B',
-            'average_ticket' => '1500 €',
-            'current_customer_acquisition' => 'Recomendaciones y anuncios',
             'selected_services' => ['web'],
             'web_pack' => 'FullWeb',
             'web_requirements' => 'Necesitamos dominio, copywriting y multidioma.',
@@ -202,5 +193,9 @@ class BriefTest extends TestCase
             'service_expectations' => ['Estrategia', 'Ejecucion tecnica'],
         ];
     }
-}
 
+    private function validPayloadWithoutHiddenSections(): array
+    {
+        return $this->validPayload();
+    }
+}
