@@ -47,7 +47,7 @@
                         </div>
 
                         <div class="metric-card">
-                            <p class="section-kicker">Renovacion</p>
+                            <p class="section-kicker">Renovación</p>
                             <div class="mt-4 space-y-4 text-sm">
                                 <div class="stat-strip"><span class="text-slate-300">Vencimiento</span><span class="font-semibold text-white">{{ optional($user->hosting_expires_at)->format('d/m/Y') ?: 'No definido' }}</span></div>
                                 <div class="stat-strip"><span class="text-slate-300">Precio</span><span class="font-semibold text-white">{{ \App\Models\User::formatPrice($user->hosting_price) }}</span></div>

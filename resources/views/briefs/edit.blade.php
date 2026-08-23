@@ -8,31 +8,35 @@ $stepRegistry = [
     ['key' => 'objetivos', 'title' => 'Objetivos', 'description' => 'Metas del proyecto', 'enabled' => false],
     ['key' => 'publico', 'title' => 'Publico', 'description' => 'Cliente ideal', 'enabled' => false],
     ['key' => 'servicios', 'title' => 'Servicios', 'description' => 'Servicios y requerimientos', 'enabled' => true],
-    ['key' => 'inversion', 'title' => 'Inversion', 'description' => 'Presupuesto', 'enabled' => true],
-    ['key' => 'marca', 'title' => 'Marca', 'description' => 'Branding y tono', 'enabled' => true],
-    ['key' => 'competencia', 'title' => 'Competencia', 'description' => 'Contexto competitivo', 'enabled' => true],
-    ['key' => 'automatizacion', 'title' => 'Automatizacion', 'description' => 'Procesos actuales', 'enabled' => true],
-    ['key' => 'timeline', 'title' => 'Timeline', 'description' => 'Fechas clave', 'enabled' => true],
-    ['key' => 'materiales', 'title' => 'Materiales', 'description' => 'Recursos disponibles', 'enabled' => true],
-    ['key' => 'expectativas', 'title' => 'Expectativas', 'description' => 'Alcance esperado', 'enabled' => true],
+    ['key' => 'inversion', 'title' => 'Inversion', 'description' => 'Presupuesto', 'enabled' => false],
+    ['key' => 'marca', 'title' => 'Marca', 'description' => 'Branding y tono', 'enabled' => false],
+    ['key' => 'competencia', 'title' => 'Competencia', 'description' => 'Contexto competitivo', 'enabled' => false],
+    ['key' => 'automatizacion', 'title' => 'Automatizacion', 'description' => 'Procesos actuales', 'enabled' => false],
+    ['key' => 'timeline', 'title' => 'Timeline', 'description' => 'Fechas clave', 'enabled' => false],
+    ['key' => 'materiales', 'title' => 'Materiales', 'description' => 'Recursos disponibles', 'enabled' => false],
+    ['key' => 'expectativas', 'title' => 'Expectativas', 'description' => 'Alcance esperado', 'enabled' => false],
 ];
 $steps = array_values(array_filter($stepRegistry, fn (array $step): bool => $step['enabled']));
 $objectiveOptions = ['Generar ventas', 'Captar leads', 'Automatizar procesos', 'Posicionamiento de marca', 'Escalar operaciones', 'Digitalizar negocio tradicional', 'Crear comunidad', 'Lanzar nuevo producto', 'Otro'];
-$serviceOptions = ['web' => 'Desarrollo web', 'apps' => 'Desarrollo de apps', 'store' => 'Tiendas online', 'design' => 'Diseno', 'systems' => 'Sistemas'];
 $brandToneOptions = ['Corporativo', 'Directo', 'Premium', 'Disruptivo', 'Minimalista', 'Otro'];
 $materialsOptions = ['Logo', 'Manual de marca', 'Fotos profesionales', 'Videos', 'Base de datos clientes', 'Nada (necesito todo)'];
 $expectationOptions = ['Estrategia', 'Ejecucion tecnica', 'Optimizacion continua', 'Soporte mensual', 'Formacion', 'Consultoria'];
 $supportOptions = ['Mantenimiento mensual web', 'Soporte tecnico', 'Marketing continuo', 'Gestion Ads', 'Gestion Social Media'];
-$systemsOptions = ['ERP', 'CRM', 'POS'];
+$serviceSelections = old('service_item_selections', data_get($briefData, 'service_item_selections', []));
+$selectedServiceIds = old('selected_service_ids', data_get($briefData, 'selected_service_ids', array_filter([$value('selected_service_id')])));
 @endphp
 
 <x-guest-layout :brief-mode="true">
     <div
         x-data="briefWizard(@js([
             'steps' => $steps,
-            'selectedServices' => $arrayValue('selected_services'),
+            'serviceCatalog' => $serviceCatalog,
+            'selectedSubcategoryId' => $value('selected_service_subcategory_id'),
+            'selectedServiceId' => $value('selected_service_id'),
+            'selectedServiceIds' => $selectedServiceIds,
+            'itemSelections' => $serviceSelections,
+            'technicalQuoteRules' => $technicalQuoteRules,
             'brandTones' => $arrayValue('brand_tone'),
-            'systemsTypes' => $arrayValue('systems_type'),
             'hasDeadline' => $value('has_deadline', 'no'),
             'hasLaunchDate' => $value('has_launch_date', 'no'),
         ]))"
@@ -144,19 +148,129 @@ $systemsOptions = ['ERP', 'CRM', 'POS'];
                         </section>
 
                         <section x-show="currentStep.key === 'servicios'" x-cloak data-step-panel="servicios" class="space-y-6">
-                            <div data-checkbox-group data-required="true" data-label="servicios" class="space-y-4">
-                                <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                                    @foreach ($serviceOptions as $serviceKey => $label)
-                                        <label class="panel-soft flex items-center gap-3 p-4 text-sm text-slate-200"><input type="checkbox" name="selected_services[]" value="{{ $serviceKey }}" x-model="selectedServices" class="rounded border-white/20 bg-slate-950 text-lime-300 focus:ring-lime-300/40" @checked(in_array($serviceKey, $arrayValue('selected_services'), true))>{{ $label }}</label>
-                                    @endforeach
+                            <div class="grid gap-5 lg:grid-cols-2">
+                                <div>
+                                    <label class="field-label">Subcategoria del servicio</label>
+                                    <select class="field-input" x-model="selectedSubcategoryId" @change="handleSubcategoryChange">
+                                        <option value="">Selecciona una subcategoria</option>
+                                        <template x-for="subcategory in catalogSubcategories" :key="subcategory.id">
+                                            <option :value="String(subcategory.id)" :disabled="hasSubcategory(subcategory.id)" x-text="hasSubcategory(subcategory.id) ? `${subcategory.name} (ya seleccionado)` : subcategory.name"></option>
+                                        </template>
+                                    </select>
                                 </div>
-                                <p data-group-error class="text-sm text-rose-300"></p>
+                                <div>
+                                    <label class="field-label">Servicio</label>
+                                    <select class="field-input" x-model="selectedServiceId" @change="handleServiceChange">
+                                        <option value="">Selecciona un servicio</option>
+                                        <template x-for="service in availableServices" :key="service.id">
+                                            <option :value="String(service.id)" x-text="service.name"></option>
+                                        </template>
+                                    </select>
+                                </div>
                             </div>
-                            <div x-show="selectedServices.includes('web')" x-cloak class="panel-soft space-y-4 p-5"><h3 class="text-xl font-semibold text-white">Desarrollo web</h3><select name="web_pack" class="field-input"><option value="">Selecciona el pack</option><option value="MiniWeb" @selected($value('web_pack') === 'MiniWeb')>MiniWeb</option><option value="FullWeb" @selected($value('web_pack') === 'FullWeb')>FullWeb</option><option value="HiperWeb" @selected($value('web_pack') === 'HiperWeb')>HiperWeb</option></select><textarea name="web_requirements" class="field-input min-h-28" placeholder="Dominio, hosting, copywriting, CRM, blog, multidioma y funcionalidades especificas">{{ $value('web_requirements') }}</textarea></div>
-                            <div x-show="selectedServices.includes('apps')" x-cloak class="panel-soft space-y-4 p-5"><h3 class="text-xl font-semibold text-white">Desarrollo de apps</h3><select name="apps_pack" class="field-input"><option value="">Selecciona el pack</option><option value="WebApp" @selected($value('apps_pack') === 'WebApp')>WebApp</option><option value="EcommerceApp" @selected($value('apps_pack') === 'EcommerceApp')>EcommerceApp</option><option value="Android & iOS" @selected($value('apps_pack') === 'Android & iOS')>Android & iOS</option></select><textarea name="apps_requirements" class="field-input min-h-28" placeholder="Modelo de negocio, pagos, login social, panel administrador y funcionalidades">{{ $value('apps_requirements') }}</textarea></div>
-                            <div x-show="selectedServices.includes('store')" x-cloak class="panel-soft space-y-4 p-5"><h3 class="text-xl font-semibold text-white">Tiendas online</h3><select name="store_pack" class="field-input"><option value="">Selecciona el pack</option><option value="MiniTienda" @selected($value('store_pack') === 'MiniTienda')>MiniTienda</option><option value="FullTienda" @selected($value('store_pack') === 'FullTienda')>FullTienda</option><option value="HiperTienda" @selected($value('store_pack') === 'HiperTienda')>HiperTienda</option></select><textarea name="store_requirements" class="field-input min-h-28" placeholder="Cantidad de productos, pagos, envios, dropshipping, multi moneda y funcionalidades">{{ $value('store_requirements') }}</textarea></div>
-                            <div x-show="selectedServices.includes('design')" x-cloak class="panel-soft space-y-4 p-5"><h3 class="text-xl font-semibold text-white">Diseno</h3><select name="design_scope" class="field-input"><option value="">Selecciona el alcance</option><option value="UI" @selected($value('design_scope') === 'UI')>UI</option><option value="UX" @selected($value('design_scope') === 'UX')>UX</option><option value="UI + UX" @selected($value('design_scope') === 'UI + UX')>UI + UX</option></select><textarea name="design_requirements" class="field-input min-h-28" placeholder="Rediseno o nuevo, branding, manual, prototipo interactivo y sistema de diseno">{{ $value('design_requirements') }}</textarea></div>
-                            <div x-show="selectedServices.includes('systems')" x-cloak class="panel-soft space-y-4 p-5"><h3 class="text-xl font-semibold text-white">Sistemas</h3><div data-checkbox-group data-required="true" data-label="tipo de sistema" class="space-y-4"><div class="grid gap-3 md:grid-cols-3">@foreach ($systemsOptions as $option)<label class="panel-dark flex items-center gap-3 p-4 text-sm text-slate-200"><input type="checkbox" name="systems_type[]" value="{{ $option }}" x-model="systemsTypes" class="rounded border-white/20 bg-slate-950 text-lime-300 focus:ring-lime-300/40" @checked(in_array($option, $arrayValue('systems_type'), true))>{{ $option }}</label>@endforeach</div><p data-group-error class="text-sm text-rose-300"></p></div><textarea name="systems_requirements" class="field-input min-h-28" placeholder="Usuarios, sucursales, inventario, facturacion electronica, reportes e integraciones">{{ $value('systems_requirements') }}</textarea></div>
+                            <div class="flex flex-wrap items-center gap-3">
+                                <button type="button" class="btn-primary" @click="addSelectedService" :disabled="!currentService || hasSubcategory(selectedSubcategoryId)">Agregar servicio</button>
+                                <p class="text-sm text-slate-400">Puedes agregar un servicio por cada subcategoria.</p>
+                            </div>
+
+                            <template x-for="serviceId in selectedServiceIds" :key="serviceId">
+                                <section class="panel-soft space-y-5 p-5">
+                                    <input type="hidden" name="selected_service_ids[]" :value="serviceId">
+                                    <template x-if="serviceById(serviceId)">
+                                        <div>
+                                            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                                <div>
+                                                    <span class="brand-badge" x-text="subcategoryForService(serviceById(serviceId))?.name || 'Servicio'"></span>
+                                                    <h3 class="mt-3 text-2xl font-semibold text-white" x-text="serviceById(serviceId).name"></h3>
+                                                    <p class="mt-2 text-sm leading-7 text-slate-300" x-text="serviceById(serviceId).description || 'Configura los elementos incluidos en este servicio.'"></p>
+                                                </div>
+                                                <button type="button" class="btn-secondary" @click="removeSelectedService(serviceId)">Quitar</button>
+                                            </div>
+
+                                            <div class="mt-5 space-y-4">
+                                                <template x-for="item in serviceById(serviceId).items || []" :key="item.id">
+                                                    <section class="panel-dark space-y-4 p-5">
+                                            <div>
+                                                <p class="text-lg font-semibold text-white" x-text="item.name"></p>
+                                                <p class="mt-2 text-sm leading-7 text-slate-400" x-text="item.description || 'Selecciona la opcion que mejor encaje con tu proyecto.'"></p>
+                                            </div>
+
+                                            <template x-if="item.options.length > 1">
+                                                <div class="grid gap-3">
+                                                    <template x-for="option in item.options" :key="option.id">
+                                                        <label class="panel-soft flex cursor-pointer items-start gap-4 p-4">
+                                                            <input
+                                                                type="radio"
+                                                                class="mt-1 h-5 w-5 shrink-0 border-white/30 bg-slate-950 text-lime-300 focus:ring-lime-300/40"
+                                                                :name="`service_item_selections[${item.id}]`"
+                                                                :value="String(option.id)"
+                                                                x-model="itemSelections[item.id]"
+                                                                :required="!isOptionalItem(item)"
+                                                            >
+                                                            <div class="flex items-start justify-between gap-4">
+                                                                <div>
+                                                                    <p class="text-sm font-semibold text-white" x-text="option.name"></p>
+                                                                    <p class="mt-2 text-sm text-slate-400" x-text="option.description || ''"></p>
+                                                                    <template x-if="option.price_summary.length">
+                                                                        <div class="mt-3 space-y-1">
+                                                                            <template x-for="priceLine in option.price_summary" :key="priceLine">
+                                                                                <p class="text-xs uppercase tracking-[0.18em] text-cyan-200" x-text="priceLine"></p>
+                                                                            </template>
+                                                                        </div>
+                                                                    </template>
+                                                                </div>
+                                                            </div>
+                                                        </label>
+                                                    </template>
+                                                </div>
+                                            </template>
+
+                                            <template x-if="item.options.length === 1">
+                                                <div>
+                                                    <input type="hidden" :name="`service_item_selections[${item.id}]`" :value="itemSelections[item.id] || ''">
+                                                    <label class="panel-soft flex items-start gap-3 p-4 text-sm text-slate-200">
+                                                        <input
+                                                            type="checkbox"
+                                                            class="mt-1 rounded border-white/20 bg-slate-950 text-lime-300 focus:ring-lime-300/40"
+                                                            :checked="isRequiredItem(item) || String(itemSelections[item.id] || '') === String(item.options[0].id)"
+                                                            :disabled="isRequiredItem(item)"
+                                                            @change="itemSelections[item.id] = $event.target.checked ? String(item.options[0].id) : ''"
+                                                        >
+                                                        <span>
+                                                            <span class="block font-semibold text-white" x-text="item.options[0].name"></span>
+                                                            <span class="mt-2 block text-slate-400" x-text="isRequiredItem(item) ? 'Incluido obligatoriamente en este servicio.' : (item.options[0].description || 'Activar este elemento dentro del servicio.')"></span>
+                                                            <template x-if="item.options[0].price_summary.length">
+                                                                <div class="mt-3 space-y-1">
+                                                                    <template x-for="priceLine in item.options[0].price_summary" :key="priceLine">
+                                                                        <p class="text-xs uppercase tracking-[0.18em] text-cyan-200" x-text="priceLine"></p>
+                                                                    </template>
+                                                                </div>
+                                                            </template>
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                            </template>
+                                                    </section>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </section>
+                            </template>
+
+                            <div x-show="selectedServiceIds.length === 0" class="panel-soft p-5 text-sm leading-7 text-slate-300">
+                                Selecciona una subcategoria y un servicio, luego pulsa Agregar servicio.
+                            </div>
+
+                            <section x-show="selectedServiceIds.length" class="panel-dark p-5">
+                                <p class="section-kicker">Estimacion automatica</p>
+                                <div class="mt-4 grid gap-4 sm:grid-cols-3">
+                                    <div><p class="text-sm text-slate-400">Presupuesto tecnico base</p><p class="mt-1 text-2xl font-semibold text-white" x-text="formatMoney(liveEstimate.technicalBase)"></p></div>
+                                    <div><p class="text-sm text-slate-400">Servicios y cargos seleccionados</p><p class="mt-1 text-2xl font-semibold text-white" x-text="formatMoney(liveEstimate.selectedCharges + liveEstimate.prepaidFees)"></p></div>
+                                    <div><p class="text-sm text-slate-400">Total estimado con la seleccion</p><p class="mt-1 text-2xl font-semibold text-lime-200" x-text="formatMoney(liveEstimate.total)"></p></div>
+                                </div>
+                                <p class="mt-4 text-sm leading-6 text-slate-400">Precio + IVA. Los cargos mensuales y anuales se suman por adelantado solo cuando los activas. El importe final se confirma despues de revisar el alcance con el equipo.</p>
+                            </section>
                         </section>
 
                         <section x-show="currentStep.key === 'inversion'" x-cloak data-step-panel="inversion"><div class="max-w-xl"><label class="field-label">Presupuesto estimado en EUR</label><input name="investment_budget" type="number" min="0" step="0.01" class="field-input" value="{{ $value('investment_budget') }}" required></div></section>
@@ -188,17 +302,84 @@ $systemsOptions = ['ERP', 'CRM', 'POS'];
                 stepIndex: 0,
                 steps: config.steps,
                 totalSteps: config.steps.length,
-                selectedServices: config.selectedServices || [],
+                serviceCatalog: config.serviceCatalog || [],
+                technicalQuoteRules: config.technicalQuoteRules || [],
+                selectedSubcategoryId: config.selectedSubcategoryId ? String(config.selectedSubcategoryId) : '',
+                selectedServiceId: config.selectedServiceId ? String(config.selectedServiceId) : '',
+                selectedServiceIds: (config.selectedServiceIds || []).map(String),
+                itemSelections: config.itemSelections || {},
                 brandTones: config.brandTones || [],
-                systemsTypes: config.systemsTypes || [],
                 hasDeadline: config.hasDeadline || 'no',
                 hasLaunchDate: config.hasLaunchDate || 'no',
+                init() { this.selectedServiceIds.forEach((serviceId) => this.ensureRequiredSelections(this.serviceById(serviceId))); },
                 get progress() { return Math.round(((this.stepIndex + 1) / this.totalSteps) * 100); },
                 get stepNumber() { return this.stepIndex + 1; },
                 get currentStep() { return this.steps[this.stepIndex] || this.steps[0] || { key: 'empresa', title: '', description: '' }; },
+                get catalogSubcategories() { return this.serviceCatalog.flatMap((category) => category.subcategories || []); },
+                get selectedSubcategory() { return this.catalogSubcategories.find((subcategory) => String(subcategory.id) === String(this.selectedSubcategoryId)) || null; },
+                get selectedSubcategoryLabel() { return this.selectedSubcategory?.name || 'Servicio'; },
+                get availableServices() { return this.selectedSubcategory?.services || []; },
+                get currentService() { return this.availableServices.find((service) => String(service.id) === String(this.selectedServiceId)) || null; },
+                serviceById(serviceId) { return this.catalogSubcategories.flatMap((subcategory) => subcategory.services || []).find((service) => String(service.id) === String(serviceId)) || null; },
+                subcategoryForService(service) { return this.catalogSubcategories.find((subcategory) => (subcategory.services || []).some((candidate) => String(candidate.id) === String(service?.id))) || null; },
+                hasSubcategory(subcategoryId) {
+                    return this.selectedServiceIds.some((serviceId) => String(this.subcategoryForService(this.serviceById(serviceId))?.id) === String(subcategoryId));
+                },
+                addSelectedService() {
+                    if (!this.currentService || this.hasSubcategory(this.selectedSubcategoryId)) return;
+                    this.ensureRequiredSelections(this.currentService);
+                    this.selectedServiceIds = [...this.selectedServiceIds, String(this.currentService.id)];
+                    this.selectedSubcategoryId = '';
+                    this.selectedServiceId = '';
+                },
+                isRequiredItem(item) { return Boolean(item?.is_required); },
+                ensureRequiredSelections(service) {
+                    for (const item of service?.items || []) {
+                        if (!this.isRequiredItem(item) || (item.options || []).length !== 1) continue;
+                        this.itemSelections[item.id] = String(item.options[0].id);
+                    }
+                },
+                removeSelectedService(serviceId) {
+                    const service = this.serviceById(serviceId);
+                    for (const item of service?.items || []) delete this.itemSelections[item.id];
+                    this.selectedServiceIds = this.selectedServiceIds.filter((id) => String(id) !== String(serviceId));
+                },
+                get liveEstimate() {
+                    let technicalBase = 0;
+                    let prepaidFees = 0;
+                    let selectedCharges = 0;
+                    for (const serviceId of this.selectedServiceIds) {
+                        const service = this.serviceById(serviceId);
+                        const subcategory = this.subcategoryForService(service);
+                        const selectedOptions = (service?.items || []).map((item) => ({ item, option: (item.options || []).find((option) => String(option.id) === String(this.itemSelections[item.id])) })).filter((entry) => entry.option);
+                        const library = selectedOptions.find((entry) => entry.item.name === 'Biblioteca')?.option;
+                        const rule = this.technicalQuoteRules.find((candidate) => candidate.subcategory_code === subcategory?.code && candidate.service_name === service?.name && candidate.library_name === library?.name);
+                        technicalBase += Number(rule?.technical_base || 0);
+                        const selectedNames = selectedOptions.map((entry) => String(entry.option.name || '').toLocaleLowerCase());
+                        const recurringFees = rule?.recurring_fees || [];
+                        for (const fee of recurringFees) {
+                            if (!selectedNames.includes(fee.name)) continue;
+                            prepaidFees += Number(fee.amount || 0);
+                        }
+                        for (const entry of selectedOptions) {
+                            if (entry.item.name === 'Biblioteca') continue;
+                            if (recurringFees.some((fee) => fee.name === String(entry.option.name || '').toLocaleLowerCase())) continue;
+                            for (const price of entry.option.prices || []) {
+                                if (!['FIRST_YEAR', 'ONE_TIME'].includes(price.price_type)) continue;
+                                const amount = Number(price.price || 0);
+                                selectedCharges += amount;
+                            }
+                        }
+                    }
+                    return { technicalBase, selectedCharges, prepaidFees, total: technicalBase + prepaidFees + selectedCharges };
+                },
+                formatMoney(amount) { return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(Number(amount || 0)); },
                 goToStep(targetIndex) { if (targetIndex < this.stepIndex || this.validateStep()) { this.stepIndex = targetIndex; window.scrollTo({ top: 0, behavior: 'smooth' }); } },
                 nextStep() { if (this.stepIndex < this.totalSteps - 1 && this.validateStep()) { this.stepIndex += 1; window.scrollTo({ top: 0, behavior: 'smooth' }); } },
                 previousStep() { if (this.stepIndex > 0) { this.stepIndex -= 1; window.scrollTo({ top: 0, behavior: 'smooth' }); } },
+                handleSubcategoryChange() { this.selectedServiceId = ''; },
+                handleServiceChange() {},
+                isOptionalItem(item) { return item.item_type === 'SERVICE' && item.options.length === 1; },
                 submitBrief() { if (this.validateStep()) { document.getElementById('brief-form').submit(); } },
                 validateStep() {
                     const panel = this.$root.querySelector(`[data-step-panel="${this.currentStep.key}"]`);

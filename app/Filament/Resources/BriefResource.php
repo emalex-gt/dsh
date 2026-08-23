@@ -64,8 +64,11 @@ class BriefResource extends Resource
                     ->separator(',')
                     ->state(fn (Brief $record): array => self::serviceLabels((array) data_get($record->data, 'selected_services', []))),
                 TextColumn::make('investment_budget')
-                    ->label('Presupuesto')
+                    ->label('Presupuesto indicado')
                     ->state(fn (Brief $record): string => self::budget($record)),
+                TextColumn::make('technical_base')
+                    ->label('Base tecnica')
+                    ->state(fn (Brief $record): string => self::technicalMoney($record, 'technical_base')),
                 TextColumn::make('origin')
                     ->label('Origen')
                     ->badge()
@@ -145,21 +148,14 @@ class BriefResource extends Resource
                             ->state(fn (Brief $record): array => self::serviceLabels((array) data_get($record->data, 'selected_services', []))),
                     ])
                     ->columns(4),
+
                 Section::make('Empresa y contacto')
                     ->collapsed()
                     ->schema([
-                        TextEntry::make('legal_name')
-                            ->label('Razon social')
-                            ->state(fn (Brief $record): string => self::value($record, 'legal_name')),
-                        TextEntry::make('brand_name')
-                            ->label('Marca')
-                            ->state(fn (Brief $record): string => self::value($record, 'brand_name')),
-                        TextEntry::make('country')
-                            ->label('Pais')
-                            ->state(fn (Brief $record): string => self::value($record, 'country')),
-                        TextEntry::make('city')
-                            ->label('Ciudad')
-                            ->state(fn (Brief $record): string => self::value($record, 'city')),
+                        TextEntry::make('legal_name')->label('Razon social')->state(fn (Brief $record): string => self::value($record, 'legal_name')),
+                        TextEntry::make('brand_name')->label('Marca')->state(fn (Brief $record): string => self::value($record, 'brand_name')),
+                        TextEntry::make('country')->label('Pais')->state(fn (Brief $record): string => self::value($record, 'country')),
+                        TextEntry::make('city')->label('Ciudad')->state(fn (Brief $record): string => self::value($record, 'city')),
                         TextEntry::make('website')
                             ->label('Sitio web')
                             ->state(fn (Brief $record): string => self::value($record, 'website'))
@@ -170,23 +166,17 @@ class BriefResource extends Resource
                             ->state(fn (Brief $record): string => self::multiline($record, 'social_links'))
                             ->html()
                             ->columnSpanFull(),
-                        TextEntry::make('contact_name')
-                            ->label('Nombre de contacto')
-                            ->state(fn (Brief $record): string => self::value($record, 'contact_name')),
-                        TextEntry::make('contact_role')
-                            ->label('Cargo')
-                            ->state(fn (Brief $record): string => self::value($record, 'contact_role')),
+                        TextEntry::make('contact_name')->label('Nombre de contacto')->state(fn (Brief $record): string => self::value($record, 'contact_name')),
+                        TextEntry::make('contact_role')->label('Cargo')->state(fn (Brief $record): string => self::value($record, 'contact_role')),
                         TextEntry::make('contact_email')
                             ->label('Email')
                             ->state(fn (Brief $record): string => self::value($record, 'contact_email'))
                             ->url(fn (Brief $record): ?string => self::emailValue($record, 'contact_email'))
                             ->copyable(),
-                        TextEntry::make('contact_phone')
-                            ->label('Telefono')
-                            ->state(fn (Brief $record): string => self::value($record, 'contact_phone'))
-                            ->copyable(),
+                        TextEntry::make('contact_phone')->label('Telefono')->state(fn (Brief $record): string => self::value($record, 'contact_phone'))->copyable(),
                     ])
                     ->columns(4),
+
                 Section::make('Objetivo comercial')
                     ->collapsed()
                     ->schema([
@@ -195,78 +185,63 @@ class BriefResource extends Resource
                             ->badge()
                             ->separator(',')
                             ->state(fn (Brief $record): array => self::textList((array) data_get($record->data, 'project_objectives', []))),
-                        TextEntry::make('project_objectives_other')
-                            ->label('Otro objetivo')
-                            ->state(fn (Brief $record): string => self::value($record, 'project_objectives_other')),
-                        TextEntry::make('results_timeframe')
-                            ->label('Horizonte esperado')
-                            ->state(fn (Brief $record): string => self::value($record, 'results_timeframe')),
-                        TextEntry::make('business_model')
-                            ->label('Modelo de negocio')
-                            ->state(fn (Brief $record): string => self::value($record, 'business_model')),
-                        TextEntry::make('ideal_customer')
-                            ->label('Cliente ideal')
-                            ->state(fn (Brief $record): string => self::multiline($record, 'ideal_customer'))
-                            ->html()
-                            ->columnSpan(2),
-                        TextEntry::make('main_market')
-                            ->label('Mercado principal')
-                            ->state(fn (Brief $record): string => self::value($record, 'main_market')),
-                        TextEntry::make('average_age')
-                            ->label('Edad media')
-                            ->state(fn (Brief $record): string => self::value($record, 'average_age')),
-                        TextEntry::make('average_ticket')
-                            ->label('Ticket medio')
-                            ->state(fn (Brief $record): string => self::value($record, 'average_ticket')),
-                        TextEntry::make('current_customer_acquisition')
-                            ->label('Captacion actual')
-                            ->state(fn (Brief $record): string => self::multiline($record, 'current_customer_acquisition'))
-                            ->html()
-                            ->columnSpanFull(),
+                        TextEntry::make('project_objectives_other')->label('Otro objetivo')->state(fn (Brief $record): string => self::value($record, 'project_objectives_other')),
+                        TextEntry::make('results_timeframe')->label('Horizonte esperado')->state(fn (Brief $record): string => self::value($record, 'results_timeframe')),
+                        TextEntry::make('business_model')->label('Modelo de negocio')->state(fn (Brief $record): string => self::value($record, 'business_model')),
+                        TextEntry::make('ideal_customer')->label('Cliente ideal')->state(fn (Brief $record): string => self::multiline($record, 'ideal_customer'))->html()->columnSpan(2),
+                        TextEntry::make('main_market')->label('Mercado principal')->state(fn (Brief $record): string => self::value($record, 'main_market')),
+                        TextEntry::make('average_age')->label('Edad media')->state(fn (Brief $record): string => self::value($record, 'average_age')),
+                        TextEntry::make('average_ticket')->label('Ticket medio')->state(fn (Brief $record): string => self::value($record, 'average_ticket')),
+                        TextEntry::make('current_customer_acquisition')->label('Captacion actual')->state(fn (Brief $record): string => self::multiline($record, 'current_customer_acquisition'))->html()->columnSpanFull(),
                     ])
                     ->columns(4),
+
                 Section::make('Servicios solicitados')
                     ->collapsed()
                     ->schema([
-                        TextEntry::make('selected_services_summary')
-                            ->label('Servicios elegidos')
-                            ->badge()
-                            ->separator(',')
-                            ->state(fn (Brief $record): array => self::serviceLabels((array) data_get($record->data, 'selected_services', [])))
+                        TextEntry::make('selected_service_summary')
+                            ->label('Ruta seleccionada')
+                            ->state(fn (Brief $record): string => self::value($record, 'selected_service_summary'))
                             ->columnSpanFull(),
-                        TextEntry::make('web_block')
-                            ->label('Web')
-                            ->state(fn (Brief $record): string => self::serviceBlock($record, 'web_pack', 'web_requirements'))
-                            ->html()
-                            ->columnSpan(2),
-                        TextEntry::make('apps_block')
-                            ->label('Apps')
-                            ->state(fn (Brief $record): string => self::serviceBlock($record, 'apps_pack', 'apps_requirements'))
-                            ->html()
-                            ->columnSpan(2),
-                        TextEntry::make('store_block')
-                            ->label('Tienda online')
-                            ->state(fn (Brief $record): string => self::serviceBlock($record, 'store_pack', 'store_requirements'))
-                            ->html()
-                            ->columnSpan(2),
-                        TextEntry::make('design_block')
-                            ->label('UX / UI')
-                            ->state(fn (Brief $record): string => self::serviceBlock($record, 'design_scope', 'design_requirements'))
-                            ->html()
-                            ->columnSpan(2),
-                        TextEntry::make('systems_type')
-                            ->label('Sistemas')
-                            ->badge()
-                            ->separator(',')
-                            ->state(fn (Brief $record): array => self::textList((array) data_get($record->data, 'systems_type', [])))
-                            ->columnSpanFull(),
-                        TextEntry::make('systems_requirements')
-                            ->label('Requisitos de sistemas')
-                            ->state(fn (Brief $record): string => self::multiline($record, 'systems_requirements'))
+                        TextEntry::make('selected_service_items')
+                            ->label('Configuracion elegida')
+                            ->state(fn (Brief $record): string => self::selectedServiceItemsHtml($record))
                             ->html()
                             ->columnSpanFull(),
                     ])
-                    ->columns(4),
+                    ->columns(2),
+
+                Section::make('Estimacion tecnica y presupuesto base')
+                    ->collapsed()
+                    ->schema([
+                        TextEntry::make('technical_estimate_status')
+                            ->label('Estado')
+                            ->badge()
+                            ->color(fn (Brief $record): string => data_get($record->data, 'technical_estimate.status') === 'calculated' ? 'success' : 'warning')
+                            ->state(fn (Brief $record): string => data_get($record->data, 'technical_estimate.status') === 'calculated' ? 'Calculada' : 'Sin regla'),
+                        TextEntry::make('technical_scenario')
+                            ->label('Escenario B')
+                            ->state(fn (Brief $record): string => (string) data_get($record->data, 'technical_estimate.technical_service.scenario', '-')),
+                        TextEntry::make('technical_library')
+                            ->label('Biblioteca')
+                            ->state(fn (Brief $record): string => (string) data_get($record->data, 'technical_estimate.library.name', '-')),
+                        TextEntry::make('technical_effort')
+                            ->label('Esfuerzo')
+                            ->state(fn (Brief $record): string => self::technicalEffort($record)),
+                        TextEntry::make('technical_base')
+                            ->label('Presupuesto base tecnico')
+                            ->state(fn (Brief $record): string => self::technicalMoney($record, 'technical_base')),
+                        TextEntry::make('technical_total')
+                            ->label('Total estimado con seleccion')
+                            ->state(fn (Brief $record): string => self::technicalMoney($record, 'estimated_total')),
+                        TextEntry::make('technical_reason')
+                            ->label('Motivo')
+                            ->state(fn (Brief $record): string => (string) data_get($record->data, 'technical_estimate.reason', '-'))
+                            ->visible(fn (Brief $record): bool => data_get($record->data, 'technical_estimate.status') !== 'calculated')
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(3),
+
                 Section::make('Marca, competencia y contexto')
                     ->collapsed()
                     ->schema([
@@ -275,117 +250,41 @@ class BriefResource extends Resource
                             ->badge()
                             ->separator(',')
                             ->state(fn (Brief $record): array => self::textList((array) data_get($record->data, 'brand_tone', []))),
-                        TextEntry::make('brand_tone_other')
-                            ->label('Otro tono')
-                            ->state(fn (Brief $record): string => self::value($record, 'brand_tone_other')),
-                        TextEntry::make('brand_values')
-                            ->label('Valores')
-                            ->state(fn (Brief $record): string => self::multiline($record, 'brand_values'))
-                            ->html()
-                            ->columnSpanFull(),
-                        TextEntry::make('competitive_differentiator')
-                            ->label('Diferenciador')
-                            ->state(fn (Brief $record): string => self::multiline($record, 'competitive_differentiator'))
-                            ->html()
-                            ->columnSpanFull(),
-                        TextEntry::make('main_competitors')
-                            ->label('Competidores principales')
-                            ->state(fn (Brief $record): string => self::multiline($record, 'main_competitors'))
-                            ->html()
-                            ->columnSpanFull(),
-                        TextEntry::make('competitors_best')
-                            ->label('Lo mejor que ve en la competencia')
-                            ->state(fn (Brief $record): string => self::multiline($record, 'competitors_best'))
-                            ->html()
-                            ->columnSpanFull(),
-                        TextEntry::make('competitors_worst')
-                            ->label('Lo peor que ve en la competencia')
-                            ->state(fn (Brief $record): string => self::multiline($record, 'competitors_worst'))
-                            ->html()
-                            ->columnSpanFull(),
-                        TextEntry::make('competitive_advantage')
-                            ->label('Ventaja competitiva propia')
-                            ->state(fn (Brief $record): string => self::multiline($record, 'competitive_advantage'))
-                            ->html()
-                            ->columnSpanFull(),
+                        TextEntry::make('brand_tone_other')->label('Otro tono')->state(fn (Brief $record): string => self::value($record, 'brand_tone_other')),
+                        TextEntry::make('brand_values')->label('Valores')->state(fn (Brief $record): string => self::multiline($record, 'brand_values'))->html()->columnSpanFull(),
+                        TextEntry::make('competitive_differentiator')->label('Diferenciador')->state(fn (Brief $record): string => self::multiline($record, 'competitive_differentiator'))->html()->columnSpanFull(),
+                        TextEntry::make('main_competitors')->label('Competidores principales')->state(fn (Brief $record): string => self::multiline($record, 'main_competitors'))->html()->columnSpanFull(),
+                        TextEntry::make('competitors_best')->label('Lo mejor que ve en la competencia')->state(fn (Brief $record): string => self::multiline($record, 'competitors_best'))->html()->columnSpanFull(),
+                        TextEntry::make('competitors_worst')->label('Lo peor que ve en la competencia')->state(fn (Brief $record): string => self::multiline($record, 'competitors_worst'))->html()->columnSpanFull(),
+                        TextEntry::make('competitive_advantage')->label('Ventaja competitiva propia')->state(fn (Brief $record): string => self::multiline($record, 'competitive_advantage'))->html()->columnSpanFull(),
                     ])
                     ->columns(2),
+
                 Section::make('Operativa y timing')
                     ->collapsed()
                     ->schema([
-                        TextEntry::make('uses_crm')
-                            ->label('Usa CRM')
-                            ->badge()
-                            ->color(fn (Brief $record): string => self::yesNoColor($record, 'uses_crm'))
-                            ->state(fn (Brief $record): string => self::yesNo($record, 'uses_crm')),
-                        TextEntry::make('uses_email_marketing')
-                            ->label('Email marketing')
-                            ->badge()
-                            ->color(fn (Brief $record): string => self::yesNoColor($record, 'uses_email_marketing'))
-                            ->state(fn (Brief $record): string => self::yesNo($record, 'uses_email_marketing')),
-                        TextEntry::make('needs_funnels')
-                            ->label('Funnels')
-                            ->badge()
-                            ->color(fn (Brief $record): string => self::yesNoColor($record, 'needs_funnels'))
-                            ->state(fn (Brief $record): string => self::yesNo($record, 'needs_funnels')),
-                        TextEntry::make('needs_sales_automation')
-                            ->label('Automatizacion comercial')
-                            ->badge()
-                            ->color(fn (Brief $record): string => self::yesNoColor($record, 'needs_sales_automation'))
-                            ->state(fn (Brief $record): string => self::yesNo($record, 'needs_sales_automation')),
-                        TextEntry::make('needs_ads_integration')
-                            ->label('Integracion Ads')
-                            ->badge()
-                            ->color(fn (Brief $record): string => self::yesNoColor($record, 'needs_ads_integration'))
-                            ->state(fn (Brief $record): string => self::yesNo($record, 'needs_ads_integration')),
-                        TextEntry::make('desired_start_date')
-                            ->label('Inicio deseado')
-                            ->state(fn (Brief $record): string => self::value($record, 'desired_start_date')),
-                        TextEntry::make('has_deadline')
-                            ->label('Tiene deadline')
-                            ->badge()
-                            ->color(fn (Brief $record): string => self::yesNoColor($record, 'has_deadline'))
-                            ->state(fn (Brief $record): string => self::yesNo($record, 'has_deadline')),
-                        TextEntry::make('deadline_date')
-                            ->label('Fecha limite')
-                            ->state(fn (Brief $record): string => self::value($record, 'deadline_date')),
-                        TextEntry::make('has_launch_date')
-                            ->label('Tiene lanzamiento')
-                            ->badge()
-                            ->color(fn (Brief $record): string => self::yesNoColor($record, 'has_launch_date'))
-                            ->state(fn (Brief $record): string => self::yesNo($record, 'has_launch_date')),
-                        TextEntry::make('launch_date')
-                            ->label('Fecha de lanzamiento')
-                            ->state(fn (Brief $record): string => self::value($record, 'launch_date')),
+                        TextEntry::make('uses_crm')->label('Usa CRM')->badge()->color(fn (Brief $record): string => self::yesNoColor($record, 'uses_crm'))->state(fn (Brief $record): string => self::yesNo($record, 'uses_crm')),
+                        TextEntry::make('uses_email_marketing')->label('Email marketing')->badge()->color(fn (Brief $record): string => self::yesNoColor($record, 'uses_email_marketing'))->state(fn (Brief $record): string => self::yesNo($record, 'uses_email_marketing')),
+                        TextEntry::make('needs_funnels')->label('Funnels')->badge()->color(fn (Brief $record): string => self::yesNoColor($record, 'needs_funnels'))->state(fn (Brief $record): string => self::yesNo($record, 'needs_funnels')),
+                        TextEntry::make('needs_sales_automation')->label('Automatizacion comercial')->badge()->color(fn (Brief $record): string => self::yesNoColor($record, 'needs_sales_automation'))->state(fn (Brief $record): string => self::yesNo($record, 'needs_sales_automation')),
+                        TextEntry::make('needs_ads_integration')->label('Integracion Ads')->badge()->color(fn (Brief $record): string => self::yesNoColor($record, 'needs_ads_integration'))->state(fn (Brief $record): string => self::yesNo($record, 'needs_ads_integration')),
+                        TextEntry::make('desired_start_date')->label('Inicio deseado')->state(fn (Brief $record): string => self::value($record, 'desired_start_date')),
+                        TextEntry::make('has_deadline')->label('Tiene deadline')->badge()->color(fn (Brief $record): string => self::yesNoColor($record, 'has_deadline'))->state(fn (Brief $record): string => self::yesNo($record, 'has_deadline')),
+                        TextEntry::make('deadline_date')->label('Fecha limite')->state(fn (Brief $record): string => self::value($record, 'deadline_date')),
+                        TextEntry::make('has_launch_date')->label('Tiene lanzamiento')->badge()->color(fn (Brief $record): string => self::yesNoColor($record, 'has_launch_date'))->state(fn (Brief $record): string => self::yesNo($record, 'has_launch_date')),
+                        TextEntry::make('launch_date')->label('Fecha de lanzamiento')->state(fn (Brief $record): string => self::value($record, 'launch_date')),
                     ])
                     ->columns(5),
+
                 Section::make('Materiales y seguimiento')
                     ->collapsed()
                     ->schema([
-                        TextEntry::make('materials_available')
-                            ->label('Material disponible')
-                            ->badge()
-                            ->separator(',')
-                            ->state(fn (Brief $record): array => self::textList((array) data_get($record->data, 'materials_available', [])))
-                            ->columnSpanFull(),
-                        TextEntry::make('service_expectations')
-                            ->label('Expectativas del servicio')
-                            ->badge()
-                            ->separator(',')
-                            ->state(fn (Brief $record): array => self::textList((array) data_get($record->data, 'service_expectations', [])))
-                            ->columnSpanFull(),
-                        TextEntry::make('optional_support')
-                            ->label('Soporte adicional')
-                            ->badge()
-                            ->separator(',')
-                            ->state(fn (Brief $record): array => self::textList((array) data_get($record->data, 'optional_support', [])))
-                            ->columnSpanFull(),
-                        TextEntry::make('admin_notes')
-                            ->label('Nota interna')
-                            ->state(fn (Brief $record): string => self::plainText($record->admin_notes))
-                            ->placeholder('Sin notas internas por ahora')
-                            ->columnSpanFull(),
+                        TextEntry::make('materials_available')->label('Material disponible')->badge()->separator(',')->state(fn (Brief $record): array => self::textList((array) data_get($record->data, 'materials_available', [])))->columnSpanFull(),
+                        TextEntry::make('service_expectations')->label('Expectativas del servicio')->badge()->separator(',')->state(fn (Brief $record): array => self::textList((array) data_get($record->data, 'service_expectations', [])))->columnSpanFull(),
+                        TextEntry::make('optional_support')->label('Soporte adicional')->badge()->separator(',')->state(fn (Brief $record): array => self::textList((array) data_get($record->data, 'optional_support', [])))->columnSpanFull(),
+                        TextEntry::make('admin_notes')->label('Nota interna')->state(fn (Brief $record): string => self::plainText($record->admin_notes))->placeholder('Sin notas internas por ahora')->columnSpanFull(),
                     ]),
+
                 Section::make('Fiscal')
                     ->collapsed()
                     ->schema([
@@ -532,12 +431,32 @@ class BriefResource extends Resource
         return filled($value) ? "mailto:{$value}" : null;
     }
 
-    protected static function serviceBlock(Brief $record, string $packKey, string $requirementsKey): string
+    protected static function selectedServiceItemsHtml(Brief $record): string
     {
-        $pack = self::value($record, $packKey, 'Sin pack especificado');
-        $requirements = self::multiline($record, $requirementsKey, 'Sin requisitos indicados');
+        $items = collect((array) data_get($record->data, 'selected_service_items', []))
+            ->filter(fn (mixed $item): bool => filled(data_get($item, 'item_name')) && filled(data_get($item, 'option_name')));
 
-        return '<strong>Pack:</strong> '.e($pack).'<br><br><strong>Detalle:</strong><br>'.$requirements;
+        if ($items->isEmpty()) {
+            return 'Sin configuracion detallada registrada.';
+        }
+
+        return $items
+            ->map(function (array $item): string {
+                $prices = collect((array) data_get($item, 'price_summary', []))
+                    ->filter(fn (mixed $price): bool => filled($price))
+                    ->map(fn (mixed $price): string => e((string) $price))
+                    ->implode('<br>');
+
+                $html = '<strong>'.e((string) data_get($item, 'item_name')).'</strong><br>';
+                $html .= e((string) data_get($item, 'option_name'));
+
+                if ($prices !== '') {
+                    $html .= '<br><span style="font-size:12px; opacity:.8;">'.$prices.'</span>';
+                }
+
+                return $html;
+            })
+            ->implode('<br><br>');
     }
 
     protected static function budget(Brief $record): string
@@ -549,6 +468,24 @@ class BriefResource extends Resource
         }
 
         return number_format((float) $value, 0, ',', '.').' €';
+    }
+
+    protected static function technicalEffort(Brief $record): string
+    {
+        $effort = (array) data_get($record->data, 'technical_estimate.effort', []);
+
+        if ($effort === []) {
+            return '-';
+        }
+
+        return sprintf('%s personas, %s dias, %s horas', $effort['people'] ?? 0, $effort['days'] ?? 0, $effort['subtotal_hours'] ?? 0);
+    }
+
+    protected static function technicalMoney(Brief $record, string $key): string
+    {
+        $amount = data_get($record->data, "technical_estimate.budget.{$key}");
+
+        return is_numeric($amount) ? number_format((float) $amount, 2, ',', '.').' EUR' : '-';
     }
 
     protected static function yesNo(Brief $record, string $key): string
@@ -569,6 +506,3 @@ class BriefResource extends Resource
         };
     }
 }
-
-
-

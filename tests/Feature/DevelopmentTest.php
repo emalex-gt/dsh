@@ -39,10 +39,10 @@ class DevelopmentTest extends TestCase
             'hosting_username' => 'cliente_host',
             'hosting_password' => 'host-pass',
             'hosting_expires_at' => '2026-12-01',
-            'hosting_price' => '129 € / ano',
+            'hosting_price' => '129 € / año',
             'domain_name' => 'www.demo.test',
             'domain_expires_at' => '2026-11-20',
-            'domain_price' => '18 € / ano',
+            'domain_price' => '18 € / año',
         ]);
 
         ClientEmailAccount::create([
@@ -59,13 +59,13 @@ class DevelopmentTest extends TestCase
             ->assertOk()
             ->assertSee('https://hosting.demo.test')
             ->assertSee('cliente_host')
-            ->assertSee('129 € / ano');
+            ->assertSee('129 € / año');
 
         $this->actingAs($user)
             ->get(route('client.development.show', 'dominio'))
             ->assertOk()
             ->assertSee('www.demo.test')
-            ->assertSee('18 € / ano');
+            ->assertSee('18 € / año');
 
         $this->actingAs($user)
             ->get(route('client.development.show', 'email'))
