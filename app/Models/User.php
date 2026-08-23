@@ -47,6 +47,7 @@ class User extends Authenticatable implements FilamentUser
     protected $hidden = [
         'password',
         'remember_token',
+        'hosting_password',
     ];
 
     protected $appends = [
@@ -61,6 +62,7 @@ class User extends Authenticatable implements FilamentUser
             'email_verified_at' => 'datetime',
             'is_admin' => 'boolean',
             'password' => 'hashed',
+            'hosting_password' => 'encrypted',
             'hosting_expires_at' => 'date',
             'domain_expires_at' => 'date',
         ];

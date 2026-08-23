@@ -103,7 +103,10 @@ class ClientUserResource extends Resource
                 ->maxLength(255),
             TextInput::make('hosting_password')
                 ->label('Hosting: contrasena')
-                ->maxLength(255),
+                ->password()
+                ->revealable()
+                ->maxLength(255)
+                ->dehydrated(fn (?string $state): bool => filled($state)),
             DatePicker::make('hosting_expires_at')
                 ->label('Hosting: fecha de vencimiento')
                 ->native(false),
@@ -144,7 +147,10 @@ class ClientUserResource extends Resource
                         ->maxLength(255),
                     TextInput::make('password')
                         ->label('Contrasena')
-                        ->maxLength(255),
+                        ->password()
+                        ->revealable()
+                        ->maxLength(255)
+                        ->dehydrated(fn (?string $state): bool => filled($state)),
                 ])
                 ->columnSpanFull()
                 ->defaultItems(0)
