@@ -35,13 +35,8 @@ Route::get('/session/refresh', function (Request $request) {
     ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
 })->name('session.refresh');
 
-Route::get('/_ops/clear', function () {
-    $token = request('token');
-
-    abort_unless(
-        is_string($token) && filled(env('OPS_CLEAR_TOKEN')) && hash_equals((string) env('OPS_CLEAR_TOKEN'), $token),
-        403
-    );
+Route::post('/_ops/clear', function (Request $request) {
+    abort_unless($request->user()?->is_admin, 403);
 
     Artisan::call('optimize:clear');
     Artisan::call('config:clear');
@@ -51,7 +46,7 @@ Route::get('/_ops/clear', function () {
 
     return response('Caches limpiadas correctamente.', 200)
         ->header('Content-Type', 'text/plain; charset=UTF-8');
-});
+})->middleware('auth');
 
 Route::middleware('auth')->group(function () {
     Route::get('/mis-datos', [ClientBriefController::class, 'showClientData'])->name('client.data.show');
