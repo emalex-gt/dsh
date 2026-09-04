@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreClientBriefRequest;
 use App\Models\Brief;
 use App\Models\Calculation;
+use App\Models\CatalogService;
 use App\Models\ServiceCategory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,10 +14,11 @@ use Illuminate\View\View;
 
 class ClientBriefController extends Controller
 {
-    public function edit(): View
+    public function edit(Request $request): View
     {
         return view('briefs.edit', [
             'brief' => request()->user()?->briefs()->latest('submitted_at')->latest('id')->first(),
+            'preselectedServiceIds' => $this->preselectedServiceIds($request),
             'serviceCatalog' => $this->serviceCatalog(),
             'technicalQuoteRules' => $this->technicalQuoteRules(),
         ]);
@@ -167,6 +169,37 @@ class ClientBriefController extends Controller
                     })->values()->all(),
                 ];
             })
+            ->values()
+            ->all();
+    }
+
+    private function preselectedServiceIds(Request $request): array
+    {
+        $requestedServices = collect(explode(',', (string) $request->query('servicios', '')))
+            ->map(fn (string $service): string => mb_strtolower(trim($service)))
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($requestedServices->isEmpty()) {
+            return [];
+        }
+
+        $services = CatalogService::query()
+            ->where('active', true)
+            ->whereHas('subcategory.category', fn ($query) => $query
+                ->where('type', 'A_SERVICIOS')
+                ->where('active', true))
+            ->with('subcategory')
+            ->get();
+
+        return $requestedServices
+            ->map(function (string $requestedService) use ($services): ?int {
+                $service = $services->first(fn (CatalogService $service): bool => mb_strtolower("{$service->subcategory->code}.{$service->code}") === $requestedService);
+
+                return $service?->id;
+            })
+            ->filter()
             ->values()
             ->all();
     }

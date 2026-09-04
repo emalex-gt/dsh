@@ -23,7 +23,7 @@ $materialsOptions = ['Logo', 'Manual de marca', 'Fotos profesionales', 'Videos',
 $expectationOptions = ['Estrategia', 'Ejecucion tecnica', 'Optimizacion continua', 'Soporte mensual', 'Formacion', 'Consultoria'];
 $supportOptions = ['Mantenimiento mensual web', 'Soporte tecnico', 'Marketing continuo', 'Gestion Ads', 'Gestion Social Media'];
 $serviceSelections = old('service_item_selections', data_get($briefData, 'service_item_selections', []));
-$selectedServiceIds = old('selected_service_ids', data_get($briefData, 'selected_service_ids', array_filter([$value('selected_service_id')])));
+$selectedServiceIds = old('selected_service_ids', $preselectedServiceIds ?: data_get($briefData, 'selected_service_ids', array_filter([$value('selected_service_id')])));
 @endphp
 
 <x-guest-layout :brief-mode="true">
@@ -105,7 +105,7 @@ $selectedServiceIds = old('selected_service_ids', data_get($briefData, 'selected
                             <div><label class="field-label">Nombre comercial</label><input name="brand_name" class="field-input" value="{{ $value('brand_name') }}"></div>
                             <div><label class="field-label">Pais</label><input name="country" class="field-input" value="{{ $value('country') }}" required></div>
                             <div><label class="field-label">Ciudad</label><input name="city" class="field-input" value="{{ $value('city') }}" required></div>
-                            <div class="md:col-span-2"><label class="field-label">Sitio web actual</label><input name="website" type="url" class="field-input" value="{{ $value('website') }}"></div>
+                            <div class="md:col-span-2"><label class="field-label">Sitio web actual</label><input name="website" type="text" class="field-input" value="{{ $value('website') }}"></div>
                             <div class="md:col-span-2"><label class="field-label">Redes sociales activas</label><textarea name="social_links" class="field-input min-h-28">{{ $value('social_links') }}</textarea></div>
                             <div><label class="field-label">Persona de contacto</label><input name="contact_name" class="field-input" value="{{ $value('contact_name') }}" required></div>
                             <div><label class="field-label">Cargo</label><input name="contact_role" class="field-input" value="{{ $value('contact_role') }}" required></div>

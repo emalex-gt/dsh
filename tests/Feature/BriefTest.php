@@ -68,6 +68,54 @@ class BriefTest extends TestCase
         $this->assertCount(0, data_get($brief->data, 'technical_estimate.selected_extra_fees'));
     }
 
+    public function test_brief_accepts_current_website_without_a_protocol(): void
+    {
+        $this->seed(ServiceCatalogSeeder::class);
+
+        $service = CatalogService::query()
+            ->where('name', 'Mini Web')
+            ->whereHas('subcategory.category', fn ($query) => $query->where('type', 'A_SERVICIOS'))
+            ->with('items.options')
+            ->firstOrFail();
+        $hostingItem = $service->items->firstWhere('name', 'Hosting y Dominio');
+        $libraryItem = $service->items->firstWhere('name', 'Biblioteca');
+
+        foreach (['www.miweb.com', 'miweb.xxx'] as $website) {
+            $response = $this->post(route('brief.update'), array_merge(
+                $this->payload($service, [
+                    (string) $hostingItem->id => $hostingItem->options->first()->id,
+                    (string) $libraryItem->id => $libraryItem->options->first()->id,
+                ]),
+                ['website' => $website],
+            ));
+
+            $response->assertRedirect(route('brief.thanks'));
+            $this->assertSame($website, Brief::query()->latest('id')->firstOrFail()->data['website']);
+        }
+    }
+
+    public function test_brief_preselects_services_from_url_parameters(): void
+    {
+        $this->seed(ServiceCatalogSeeder::class);
+
+        $services = CatalogService::query()
+            ->whereHas('subcategory.category', fn ($query) => $query->where('type', 'A_SERVICIOS'))
+            ->whereIn('name', ['Mini Web', 'Mini Market'])
+            ->with('subcategory')
+            ->get()
+            ->keyBy('name');
+        $miniWeb = $services->get('Mini Web');
+        $miniMarket = $services->get('Mini Market');
+        $parameters = collect([$miniWeb, $miniMarket])
+            ->map(fn (CatalogService $service): string => "{$service->subcategory->code}.{$service->code}")
+            ->implode(',');
+
+        $response = $this->get(route('brief.edit', ['servicios' => $parameters]));
+
+        $response->assertOk()
+            ->assertViewHas('preselectedServiceIds', fn (array $ids): bool => $ids === [$miniWeb->id, $miniMarket->id]);
+    }
+
     public function test_brief_requires_required_service_items_for_selected_service(): void
     {
         $this->seed(ServiceCatalogSeeder::class);

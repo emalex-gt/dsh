@@ -22,7 +22,7 @@ class StoreClientBriefRequest extends FormRequest
             'brand_name' => ['nullable', 'string', 'max:255'],
             'country' => ['required', 'string', 'max:120'],
             'city' => ['required', 'string', 'max:120'],
-            'website' => ['nullable', 'url', 'max:255'],
+            'website' => ['nullable', 'string', 'max:255'],
             'social_links' => ['nullable', 'string'],
             'contact_name' => ['required', 'string', 'max:255'],
             'contact_role' => ['required', 'string', 'max:255'],
