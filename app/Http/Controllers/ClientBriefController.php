@@ -7,6 +7,7 @@ use App\Models\Brief;
 use App\Models\Calculation;
 use App\Models\CatalogService;
 use App\Models\ServiceCategory;
+use App\Services\BriefEstimateConfirmationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -43,16 +44,11 @@ class ClientBriefController extends Controller
         return view('briefs.thanks');
     }
 
-    public function update(StoreClientBriefRequest $request): RedirectResponse
+    public function update(StoreClientBriefRequest $request, BriefEstimateConfirmationService $confirmationService): RedirectResponse
     {
-        Brief::create([
-            'user_id' => $request->user()?->id,
-            'status' => 'submitted',
-            'data' => $request->validatedBriefData(),
-            'submitted_at' => Carbon::now(),
-        ]);
+        $pending = $confirmationService->createPending($request->validatedBriefData());
 
-        return redirect()->route('brief.thanks');
+        return redirect()->route('brief.review', $pending['token']);
     }
 
     private function serviceCatalog(): array

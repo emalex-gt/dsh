@@ -46,11 +46,12 @@ class BriefTest extends TestCase
             (string) $libraryItem->id => $libraryOption->id,
         ]));
 
-        $response->assertRedirect(route('brief.thanks'));
+        $response->assertRedirect();
 
         $brief = Brief::query()->latest('id')->first();
 
         $this->assertNotNull($brief);
+        $this->assertSame('pendiente_confirmacion', $brief->status);
         $this->assertSame('Webs / Mini Web', data_get($brief->data, 'selected_service_summary'));
         $this->assertSame('Mini Web', data_get($brief->data, 'selected_service_name'));
         $this->assertSame($hostingOption->id, data_get($brief->data, "service_item_selections.{$hostingItem->id}"));

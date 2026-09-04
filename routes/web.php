@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ClientBriefController;
+use App\Http\Controllers\BriefEstimateConfirmationController;
 use App\Http\Controllers\ClientBudgetController;
 use App\Http\Controllers\ClientDevelopmentController;
 use App\Http\Controllers\ClientDevelopmentRequestController;
@@ -24,6 +25,7 @@ Route::get('/dashboard', function () {
 
 Route::get('/brief', [ClientBriefController::class, 'edit'])->name('brief.edit');
 Route::post('/brief', [ClientBriefController::class, 'update'])->name('brief.update');
+Route::get('/brief/revisar/{token}', [BriefEstimateConfirmationController::class, 'show'])->name('brief.review');
 Route::get('/brief/gracias', [ClientBriefController::class, 'thanks'])->name('brief.thanks');
 Route::get('/session/refresh', function (Request $request) {
     $request->session()->start();
