@@ -116,6 +116,19 @@ class BriefTest extends TestCase
             ->assertViewHas('preselectedServiceIds', fn (array $ids): bool => $ids === [$miniWeb->id, $miniMarket->id]);
     }
 
+    public function test_pending_brief_persists_confirmation_metadata(): void
+    {
+        $brief = Brief::create([
+            'status' => 'pendiente_confirmacion',
+            'data' => ['contact_email' => 'ana@example.test'],
+            'confirmation_token_hash' => hash('sha256', 'token'),
+            'confirmation_expires_at' => now()->addHour(),
+        ]);
+
+        $this->assertTrue($brief->isPendingConfirmation());
+        $this->assertTrue($brief->isConfirmationAvailable());
+    }
+
     public function test_brief_requires_required_service_items_for_selected_service(): void
     {
         $this->seed(ServiceCatalogSeeder::class);
