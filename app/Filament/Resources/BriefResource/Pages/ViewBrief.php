@@ -22,7 +22,7 @@ class ViewBrief extends ViewRecord
             Actions\Action::make('crearCliente')
                 ->label('Crear cliente')
                 ->icon('heroicon-o-user-plus')
-                ->visible(fn (): bool => blank($this->record->user_id))
+                ->visible(fn (): bool => blank($this->record->user_id) && $this->record->status !== 'confirmado')
                 ->fillForm([
                     'name' => data_get($this->record->data, 'contact_name') ?: data_get($this->record->data, 'brand_name') ?: data_get($this->record->data, 'legal_name'),
                     'email' => data_get($this->record->data, 'contact_email'),

@@ -20,10 +20,17 @@
                 <p class="mt-2 text-4xl font-semibold text-white">{{ number_format((float) data_get($estimate, 'budget.estimated_total_before_tax', 0), 2, ',', '.') }} €</p>
                 <p class="mt-2 text-sm text-slate-300">Importes sin IVA.</p>
             </div>
-            <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-                <a href="{{ route('brief.edit') }}" class="btn-secondary">Ajustar servicios</a>
-                <span class="btn-primary opacity-60">Confirmar estimacion y crear mi acceso</span>
-            </div>
+            <form class="mt-8 space-y-4" method="POST" action="{{ route('brief.confirm', $token) }}">
+                @csrf
+                <label class="field-label">Nombre completo para confirmar</label>
+                <input class="field-input" name="confirmed_name" value="{{ old('confirmed_name', data_get($brief->data, 'contact_name')) }}" required>
+                <label class="flex gap-3 text-sm text-slate-300"><input type="checkbox" name="accept_terms" value="1" required> Confirmo que he revisado y acepto esta estimacion inicial.</label>
+                <p class="text-sm text-slate-400">Al confirmar, generaremos tu acceso al area privada y registraremos este presupuesto para su seguimiento.</p>
+                <div class="flex flex-col gap-3 sm:flex-row">
+                <a href="{{ route('brief.adjust', $token) }}" class="btn-secondary">Ajustar servicios</a>
+                <button class="btn-primary" type="submit">Confirmar estimacion y crear mi acceso</button>
+                </div>
+            </form>
         </div>
     </section>
 </x-guest-layout>

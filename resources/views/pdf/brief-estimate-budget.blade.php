@@ -1,0 +1,5 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><style>body{font-family:DejaVu Sans;color:#172033;font-size:12px}h1{font-size:24px}table{width:100%;border-collapse:collapse;margin-top:16px}td,th{border:1px solid #d6dce6;padding:8px;text-align:left}.total{margin-top:22px;padding:14px;background:#eef8f8;font-size:18px;font-weight:bold}</style></head><body>
+<h1>Presupuesto inicial</h1><p><strong>{{ $user->project_name }}</strong><br>{{ $user->legal_name }}<br>{{ $user->email }}</p>
+<table><thead><tr><th>Servicio</th><th>Configuracion</th></tr></thead><tbody>@foreach((array)data_get($brief->data,'selected_service_items',[]) as $item)<tr><td>{{ data_get($item,'service_name') }} - {{ data_get($item,'item_name') }}</td><td>{{ data_get($item,'option_name') }}</td></tr>@endforeach</tbody></table>
+<div class="total">Estimacion inicial: {{ number_format((float)data_get($brief->data,'technical_estimate.budget.estimated_total_before_tax',0),2,',','.') }} €</div><p>Importes sin IVA.</p><p>Confirmado por {{ $brief->confirmed_name }} el {{ $brief->confirmed_at?->format('d/m/Y H:i') }}.</p>
+</body></html>

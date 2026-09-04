@@ -46,9 +46,26 @@ class ClientBriefController extends Controller
 
     public function update(StoreClientBriefRequest $request, BriefEstimateConfirmationService $confirmationService): RedirectResponse
     {
+        if ($request->filled('pending_token')) {
+            $brief = $confirmationService->findAvailable($request->string('pending_token')->toString());
+            $token = $confirmationService->rotate($brief, $request->validatedBriefData());
+
+            return redirect()->route('brief.review', $token);
+        }
+
         $pending = $confirmationService->createPending($request->validatedBriefData());
 
         return redirect()->route('brief.review', $pending['token']);
+    }
+
+    public function serviceCatalogForBrief(): array
+    {
+        return $this->serviceCatalog();
+    }
+
+    public function technicalQuoteRulesForBrief(): array
+    {
+        return $this->technicalQuoteRules();
     }
 
     private function serviceCatalog(): array

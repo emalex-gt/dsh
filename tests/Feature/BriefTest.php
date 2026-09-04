@@ -3,11 +3,15 @@
 namespace Tests\Feature;
 
 use App\Models\Brief;
+use App\Models\Budget;
 use App\Models\CatalogService;
 use App\Models\ExtraFee;
 use App\Models\ServiceCategory;
 use Database\Seeders\ServiceCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class BriefTest extends TestCase
@@ -90,7 +94,7 @@ class BriefTest extends TestCase
                 ['website' => $website],
             ));
 
-            $response->assertRedirect(route('brief.thanks'));
+            $response->assertRedirect();
             $this->assertSame($website, Brief::query()->latest('id')->firstOrFail()->data['website']);
         }
     }
@@ -128,6 +132,27 @@ class BriefTest extends TestCase
 
         $this->assertTrue($brief->isPendingConfirmation());
         $this->assertTrue($brief->isConfirmationAvailable());
+    }
+
+    public function test_confirming_an_estimate_creates_one_client_and_private_budget(): void
+    {
+        Notification::fake();
+        Storage::fake('local');
+        $token = 'confirmation-token';
+        $brief = Brief::create([
+            'status' => 'pendiente_confirmacion', 'confirmation_token_hash' => hash('sha256', $token), 'confirmation_expires_at' => now()->addHour(),
+            'data' => ['contact_name' => 'Ana Cliente', 'contact_email' => 'ana@example.test', 'legal_name' => 'Empresa SL', 'selected_service_items' => [], 'technical_estimate' => ['budget' => ['estimated_total_before_tax' => 100]]],
+        ]);
+
+        $this->post(route('brief.confirm', $token), ['confirmed_name' => 'Ana Cliente', 'accept_terms' => '1'])->assertRedirect(route('brief.thanks'));
+        $this->assertDatabaseHas('briefs', ['id' => $brief->id, 'status' => 'confirmado']);
+        $this->assertDatabaseCount('users', 1);
+        $this->assertDatabaseCount('budgets', 1);
+        Storage::disk('local')->assertExists(Budget::query()->firstOrFail()->pdf_path);
+        Notification::assertSentTo(\App\Models\User::query()->firstOrFail(), ResetPassword::class);
+        $this->post(route('brief.confirm', $token), ['confirmed_name' => 'Ana Cliente', 'accept_terms' => '1'])->assertNotFound();
+        $this->assertDatabaseCount('users', 1);
+        $this->assertDatabaseCount('budgets', 1);
     }
 
     public function test_brief_requires_required_service_items_for_selected_service(): void

@@ -333,6 +333,9 @@ class BriefResource extends Resource
     public static function statusOptions(): array
     {
         return [
+            'pendiente_confirmacion' => 'Pendiente de confirmacion',
+            'confirmado' => 'Confirmado',
+            'expirado' => 'Expirado',
             'submitted' => 'Pendiente',
             'reviewed' => 'Revisado',
             'contacted' => 'Contactado',
@@ -348,6 +351,9 @@ class BriefResource extends Resource
     public static function statusColor(string $status): string
     {
         return match ($status) {
+            'pendiente_confirmacion' => 'warning',
+            'confirmado' => 'success',
+            'expirado' => 'danger',
             'submitted' => 'warning',
             'reviewed' => 'info',
             'contacted' => 'success',

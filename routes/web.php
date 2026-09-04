@@ -26,6 +26,8 @@ Route::get('/dashboard', function () {
 Route::get('/brief', [ClientBriefController::class, 'edit'])->name('brief.edit');
 Route::post('/brief', [ClientBriefController::class, 'update'])->name('brief.update');
 Route::get('/brief/revisar/{token}', [BriefEstimateConfirmationController::class, 'show'])->name('brief.review');
+Route::get('/brief/revisar/{token}/ajustar', [BriefEstimateConfirmationController::class, 'adjust'])->name('brief.adjust');
+Route::post('/brief/revisar/{token}/confirmar', [BriefEstimateConfirmationController::class, 'confirm'])->name('brief.confirm');
 Route::get('/brief/gracias', [ClientBriefController::class, 'thanks'])->name('brief.thanks');
 Route::get('/session/refresh', function (Request $request) {
     $request->session()->start();
