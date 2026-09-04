@@ -7,6 +7,7 @@ use App\Models\Brief;
 use App\Models\Calculation;
 use App\Models\CatalogService;
 use App\Models\ServiceCategory;
+use App\Services\BriefEstimateConfirmationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -43,16 +44,28 @@ class ClientBriefController extends Controller
         return view('briefs.thanks');
     }
 
-    public function update(StoreClientBriefRequest $request): RedirectResponse
+    public function update(StoreClientBriefRequest $request, BriefEstimateConfirmationService $confirmationService): RedirectResponse
     {
-        Brief::create([
-            'user_id' => $request->user()?->id,
-            'status' => 'submitted',
-            'data' => $request->validatedBriefData(),
-            'submitted_at' => Carbon::now(),
-        ]);
+        if ($request->filled('pending_token')) {
+            $brief = $confirmationService->findAvailable($request->string('pending_token')->toString());
+            $token = $confirmationService->rotate($brief, $request->validatedBriefData());
 
-        return redirect()->route('brief.thanks');
+            return redirect()->route('brief.review', $token);
+        }
+
+        $pending = $confirmationService->createPending($request->validatedBriefData());
+
+        return redirect()->route('brief.review', $pending['token']);
+    }
+
+    public function serviceCatalogForBrief(): array
+    {
+        return $this->serviceCatalog();
+    }
+
+    public function technicalQuoteRulesForBrief(): array
+    {
+        return $this->technicalQuoteRules();
     }
 
     private function serviceCatalog(): array

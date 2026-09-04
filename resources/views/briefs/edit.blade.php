@@ -24,6 +24,8 @@ $expectationOptions = ['Estrategia', 'Ejecucion tecnica', 'Optimizacion continua
 $supportOptions = ['Mantenimiento mensual web', 'Soporte tecnico', 'Marketing continuo', 'Gestion Ads', 'Gestion Social Media'];
 $serviceSelections = old('service_item_selections', data_get($briefData, 'service_item_selections', []));
 $selectedServiceIds = old('selected_service_ids', $preselectedServiceIds ?: data_get($briefData, 'selected_service_ids', array_filter([$value('selected_service_id')])));
+$pendingToken = $pendingToken ?? null;
+$initialStepKey = $initialStepKey ?? 'empresa';
 @endphp
 
 <x-guest-layout :brief-mode="true">
@@ -39,6 +41,7 @@ $selectedServiceIds = old('selected_service_ids', $preselectedServiceIds ?: data
             'brandTones' => $arrayValue('brand_tone'),
             'hasDeadline' => $value('has_deadline', 'no'),
             'hasLaunchDate' => $value('has_launch_date', 'no'),
+            'initialStepKey' => $initialStepKey,
         ]))"
         class="panel-premium overflow-hidden"
     >
@@ -99,6 +102,7 @@ $selectedServiceIds = old('selected_service_ids', $preselectedServiceIds ?: data
 
                 <form id="brief-form" method="POST" action="{{ route('brief.update') }}" class="flex min-h-0 flex-1 flex-col">
                     @csrf
+                    @if ($pendingToken)<input type="hidden" name="pending_token" value="{{ $pendingToken }}">@endif
                     <div class="min-h-0 flex-1 overflow-y-auto px-6 py-6 sm:px-8">
                         <section x-show="currentStep.key === 'empresa'" x-cloak data-step-panel="empresa" class="grid gap-5 md:grid-cols-2">
                             <div><label class="field-label">Nombre legal</label><input name="legal_name" class="field-input" value="{{ $value('legal_name') }}" required></div>
@@ -311,7 +315,7 @@ $selectedServiceIds = old('selected_service_ids', $preselectedServiceIds ?: data
                 brandTones: config.brandTones || [],
                 hasDeadline: config.hasDeadline || 'no',
                 hasLaunchDate: config.hasLaunchDate || 'no',
-                init() { this.selectedServiceIds.forEach((serviceId) => this.ensureRequiredSelections(this.serviceById(serviceId))); },
+                init() { this.stepIndex = Math.max(0, this.steps.findIndex((step) => step.key === config.initialStepKey)); this.selectedServiceIds.forEach((serviceId) => this.ensureRequiredSelections(this.serviceById(serviceId))); },
                 get progress() { return Math.round(((this.stepIndex + 1) / this.totalSteps) * 100); },
                 get stepNumber() { return this.stepIndex + 1; },
                 get currentStep() { return this.steps[this.stepIndex] || this.steps[0] || { key: 'empresa', title: '', description: '' }; },
