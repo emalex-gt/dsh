@@ -3,13 +3,13 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ClientUserResource\Pages;
+use App\Filament\Resources\ClientUserResource\RelationManagers\EmailAccountsRelationManager;
 use App\Models\Demo;
 use App\Models\User;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -125,37 +125,6 @@ class ClientUserResource extends Resource
                 ->label('Dominio: precio')
                 ->maxLength(255)
                 ->placeholder('Ej. 18 € / año'),
-            Repeater::make('emailAccounts')
-                ->label('Correos electronicos')
-                ->relationship()
-                ->schema([
-                    TextInput::make('label')
-                        ->label('Etiqueta')
-                        ->maxLength(255)
-                        ->placeholder('Ej. Soporte'),
-                    TextInput::make('email')
-                        ->label('Correo electronico')
-                        ->email()
-                        ->required()
-                        ->maxLength(255),
-                    TextInput::make('access_link')
-                        ->label('Enlace de acceso')
-                        ->url()
-                        ->maxLength(2048),
-                    TextInput::make('username')
-                        ->label('Usuario')
-                        ->maxLength(255),
-                    TextInput::make('password')
-                        ->label('Contrasena')
-                        ->password()
-                        ->revealable()
-                        ->maxLength(255)
-                        ->dehydrated(fn (?string $state): bool => filled($state)),
-                ])
-                ->columnSpanFull()
-                ->defaultItems(0)
-                ->reorderable(false)
-                ->addActionLabel('Agregar correo'),
             TextInput::make('direct_demo_name')
                 ->label('Demo directa: nombre')
                 ->maxLength(255)
@@ -333,6 +302,13 @@ class ClientUserResource extends Resource
         ];
     }
 
+    public static function getRelations(): array
+    {
+        return [
+            EmailAccountsRelationManager::class,
+        ];
+    }
+
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
@@ -361,6 +337,3 @@ class ClientUserResource extends Resource
         $user->demos()->sync($syncData);
     }
 }
-
-
-

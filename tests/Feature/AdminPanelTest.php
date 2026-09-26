@@ -2,12 +2,25 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\CatalogServiceResource;
+use App\Filament\Resources\CatalogServiceResource\RelationManagers\ItemsRelationManager;
+use App\Filament\Resources\ClientUserResource;
+use App\Filament\Resources\ClientUserResource\RelationManagers\EmailAccountsRelationManager;
+use App\Filament\Resources\ItemOptionResource;
+use App\Filament\Resources\ItemOptionResource\RelationManagers\PricesRelationManager;
+use App\Filament\Resources\ServiceItemResource;
+use App\Filament\Resources\ServiceItemResource\RelationManagers\OptionsRelationManager;
 use App\Models\Brief;
 use App\Models\Budget;
+use App\Models\CatalogService;
 use App\Models\Demo;
 use App\Models\DemoCategory;
 use App\Models\DevelopmentRequest;
 use App\Models\Invoice;
+use App\Models\ItemOption;
+use App\Models\ServiceCategory;
+use App\Models\ServiceItem;
+use App\Models\ServiceSubcategory;
 use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -16,6 +29,53 @@ use Tests\TestCase;
 class AdminPanelTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_admin_catalog_and_client_forms_expose_progressive_relation_managers(): void
+    {
+        $this->assertContains(ItemsRelationManager::class, CatalogServiceResource::getRelations());
+        $this->assertContains(OptionsRelationManager::class, ServiceItemResource::getRelations());
+        $this->assertContains(PricesRelationManager::class, ItemOptionResource::getRelations());
+        $this->assertContains(EmailAccountsRelationManager::class, ClientUserResource::getRelations());
+        $this->assertSame('item del servicio', ServiceItemResource::getModelLabel());
+        $this->assertSame('opcion', ItemOptionResource::getModelLabel());
+    }
+
+    public function test_admin_can_open_nested_catalog_management_screens(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $category = ServiceCategory::create([
+            'name' => 'Servicios',
+            'code' => 'A',
+            'type' => 'A_SERVICIOS',
+        ]);
+        $subcategory = ServiceSubcategory::create([
+            'service_category_id' => $category->id,
+            'name' => 'Webs',
+            'code' => '1',
+        ]);
+        $service = CatalogService::create([
+            'service_subcategory_id' => $subcategory->id,
+            'name' => 'Mini Web',
+            'code' => 'a',
+        ]);
+        $item = ServiceItem::create([
+            'catalog_service_id' => $service->id,
+            'name' => 'Hosting',
+            'item_type' => 'OPTION',
+        ]);
+        $option = ItemOption::create([
+            'service_item_id' => $item->id,
+            'name' => 'Hosting M',
+        ]);
+
+        $this->actingAs($admin)
+            ->get(ServiceItemResource::getUrl('edit', ['record' => $item]))
+            ->assertOk();
+
+        $this->actingAs($admin)
+            ->get(ItemOptionResource::getUrl('edit', ['record' => $option]))
+            ->assertOk();
+    }
 
     public function test_guest_is_redirected_to_admin_login(): void
     {

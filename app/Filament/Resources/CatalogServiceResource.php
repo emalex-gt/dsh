@@ -3,12 +3,9 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\CatalogServiceResource\Pages;
+use App\Filament\Resources\CatalogServiceResource\RelationManagers\ItemsRelationManager;
 use App\Models\CatalogService;
-use App\Models\Currency;
 use App\Models\ServiceSubcategory;
-use App\Models\TaxRate;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -67,126 +64,6 @@ class CatalogServiceResource extends Resource
                 ->label('Descripcion')
                 ->rows(3)
                 ->columnSpanFull(),
-            Repeater::make('items')
-                ->label('Items del servicio')
-                ->relationship()
-                ->collapsible()
-                ->collapsed()
-                ->itemLabel(fn (array $state): string => filled($state['name'] ?? null) ? $state['name'] : 'Nuevo item')
-                ->cloneable()
-                ->reorderableWithButtons()
-                ->schema([
-                    TextInput::make('name')
-                        ->label('Nombre')
-                        ->required(),
-                    Select::make('item_type')
-                        ->label('Tipo de item')
-                        ->options([
-                            'LIST' => 'Lista de opciones',
-                            'SERVICE' => 'Servicio individual',
-                            'OPTION' => 'Opcion configurable',
-                        ])
-                        ->required(),
-                    Toggle::make('is_required')
-                        ->label('Obligatorio')
-                        ->helperText('Si tiene una unica opcion, queda seleccionada y no se puede quitar.')
-                        ->default(false),
-                    Toggle::make('applies_dsh')
-                        ->label('Aplicar DSH al precio')
-                        ->helperText('Desactivalo para hosting, dominio u otros importes sin DSH.')
-                        ->default(true),
-                    TextInput::make('sort_order')
-                        ->label('Orden')
-                        ->numeric()
-                        ->default(0)
-                        ->required(),
-                    Toggle::make('active')
-                        ->label('Activo')
-                        ->default(true),
-                    Textarea::make('description')
-                        ->label('Descripcion')
-                        ->rows(2)
-                        ->columnSpanFull(),
-                    Repeater::make('options')
-                        ->label('Opciones')
-                        ->relationship()
-                        ->collapsible()
-                        ->collapsed()
-                        ->itemLabel(fn (array $state): string => filled($state['name'] ?? null) ? $state['name'] : 'Nueva opcion')
-                        ->cloneable()
-                        ->reorderableWithButtons()
-                        ->schema([
-                            TextInput::make('name')
-                                ->label('Nombre')
-                                ->required(),
-                            TextInput::make('sort_order')
-                                ->label('Orden')
-                                ->numeric()
-                                ->default(0)
-                                ->required(),
-                            Toggle::make('active')
-                                ->label('Activa')
-                                ->default(true),
-                            Textarea::make('description')
-                                ->label('Descripcion')
-                                ->rows(2)
-                                ->columnSpanFull(),
-                            Repeater::make('prices')
-                                ->label('Precios')
-                                ->relationship()
-                                ->collapsible()
-                                ->collapsed()
-                                ->itemLabel(function (array $state): string {
-                                    $type = match ($state['price_type'] ?? null) {
-                                        'FIRST_YEAR' => 'Primer año',
-                                        'RENEWAL' => 'Renovación',
-                                        'ONE_TIME' => 'Pago único',
-                                        default => 'Nuevo precio',
-                                    };
-
-                                    return filled($state['price'] ?? null) ? "{$type}: {$state['price']} EUR" : $type;
-                                })
-                                ->cloneable()
-                                ->schema([
-                                    Select::make('price_type')
-                                        ->label('Tipo de precio')
-                                        ->options([
-                                            'FIRST_YEAR' => 'Primer año',
-                                            'RENEWAL' => 'Renovación',
-                                            'ONE_TIME' => 'Pago único',
-                                        ])
-                                        ->required(),
-                                    TextInput::make('price')
-                                        ->label('Precio')
-                                        ->numeric()
-                                        ->prefix('€')
-                                        ->required(),
-                                    Select::make('currency_id')
-                                        ->label('Moneda')
-                                        ->options(Currency::query()->orderBy('code')->pluck('code', 'id'))
-                                        ->searchable()
-                                        ->preload(),
-                                    Select::make('tax_rate_id')
-                                        ->label('Impuesto')
-                                        ->options(TaxRate::query()->orderBy('name')->pluck('name', 'id'))
-                                        ->searchable()
-                                        ->preload(),
-                                    DatePicker::make('valid_from')
-                                        ->label('Valido desde')
-                                        ->native(false),
-                                    DatePicker::make('valid_to')
-                                        ->label('Valido hasta')
-                                        ->native(false),
-                                    Toggle::make('active')
-                                        ->label('Activo')
-                                        ->default(true),
-                                    Textarea::make('notes')
-                                        ->label('Notas')
-                                        ->rows(2)
-                                        ->columnSpanFull(),
-                                ])->columns(3),
-                        ])->columns(3),
-                ])->columnSpanFull(),
         ])->columns(2);
     }
 
@@ -238,6 +115,13 @@ class CatalogServiceResource extends Resource
             'index' => Pages\ListCatalogServices::route('/'),
             'create' => Pages\CreateCatalogService::route('/create'),
             'edit' => Pages\EditCatalogService::route('/{record}/edit'),
+        ];
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            ItemsRelationManager::class,
         ];
     }
 }
