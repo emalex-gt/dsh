@@ -121,6 +121,17 @@ class BriefTest extends TestCase
             ->assertViewHas('preselectedServiceIds', fn (array $ids): bool => $ids === [$miniWeb->id, $miniMarket->id]);
     }
 
+    public function test_brief_renders_optional_steps_direct_estimate_action_and_compact_mobile_layout(): void
+    {
+        $response = $this->get(route('brief.edit'));
+
+        $response->assertOk()
+            ->assertSee('\\u0022key\\u0022:\\u0022fiscal\\u0022', false)
+            ->assertSee('\\u0022key\\u0022:\\u0022expectativas\\u0022', false)
+            ->assertSee('Ver estimacion')
+            ->assertSee('px-2 py-2 sm:px-6 lg:px-8', false);
+    }
+
     public function test_pending_brief_persists_confirmation_metadata(): void
     {
         $brief = Brief::create([

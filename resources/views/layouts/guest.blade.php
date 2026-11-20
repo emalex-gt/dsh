@@ -11,14 +11,14 @@
     </head>
     <body class="antialiased">
         @if ($briefMode)
-            <div class="relative isolate min-h-screen overflow-hidden px-4 py-4 sm:px-6 lg:px-8">
+            <div class="relative isolate min-h-screen overflow-hidden px-2 py-2 sm:px-6 lg:px-8">
                 <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(39,215,198,0.18),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(176,255,76,0.1),_transparent_22%)]"></div>
                 <div class="absolute left-10 top-24 -z-10 h-48 w-48 rounded-full bg-cyan-400/15 blur-3xl"></div>
                 <div class="absolute bottom-16 right-8 -z-10 h-64 w-64 rounded-full bg-lime-300/10 blur-3xl"></div>
 
-                <div class="mx-auto flex min-h-[calc(100vh-2rem)] max-w-7xl flex-col justify-center">
-                    <div class="mb-6 flex justify-center lg:mb-8">
-                        <img src="https://tech.dshcompany.com/wp-content/uploads/2023/11/tech1.png" alt="DSH Tech" class="h-14 w-auto opacity-95 sm:h-16" />
+                <div class="mx-auto flex min-h-[calc(100vh-1rem)] max-w-7xl flex-col justify-center sm:min-h-[calc(100vh-2rem)]">
+                    <div class="mb-3 flex justify-center sm:mb-6 lg:mb-8">
+                        <img src="https://tech.dshcompany.com/wp-content/uploads/2023/11/tech1.png" alt="DSH Tech" class="h-12 w-auto opacity-95 sm:h-16" />
                     </div>
 
                     {{ $slot }}
