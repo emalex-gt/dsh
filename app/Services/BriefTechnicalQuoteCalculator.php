@@ -18,20 +18,21 @@ class BriefTechnicalQuoteCalculator
         $technicalService = $this->technicalServiceFor($commercialService);
         $libraryType = $this->libraryTypeFor($selectedOptions);
 
-        if (! $technicalService || ! $libraryType) {
+        if (! $libraryType) {
             return $this->unavailable(
                 $commercialService,
                 $technicalService,
                 $libraryType,
-                'Falta configurar el servicio tecnico o el tipo de biblioteca equivalente.',
+                'Falta configurar el tipo de biblioteca equivalente.',
             );
         }
 
-        $calculation = Calculation::query()
-            ->with(['extraFees.extraFee.taxRate', 'extraFees.extraFee.currency'])
-            ->where('catalog_service_id', $technicalService->id)
-            ->where('library_type_id', $libraryType->id)
-            ->first();
+        $calculation = $technicalService
+            ? $this->calculationFor($technicalService, $libraryType)
+            : null;
+
+        // Some existing catalogs store the calculation directly on the commercial service.
+        $calculation ??= $this->calculationFor($commercialService, $libraryType);
 
         if (! $calculation) {
             return $this->unavailable(
@@ -41,6 +42,8 @@ class BriefTechnicalQuoteCalculator
                 'No existe una regla de calculo B activa para esta combinacion.',
             );
         }
+
+        $technicalService = $calculation->service ?? $technicalService ?? $commercialService;
 
         $selectedOptionEntries = $this->selectedOptionEntries($selectedOptions, $calculation);
         $extras = $this->selectedRecurringFees($selectedOptions, $calculation);
@@ -108,6 +111,15 @@ class BriefTechnicalQuoteCalculator
                     ->where('active', true)))
             ->with('subcategory')
             ->orderBy('id')
+            ->first();
+    }
+
+    private function calculationFor(CatalogService $service, LibraryType $libraryType): ?Calculation
+    {
+        return Calculation::query()
+            ->with(['service.subcategory', 'extraFees.extraFee.taxRate', 'extraFees.extraFee.currency'])
+            ->where('catalog_service_id', $service->id)
+            ->where('library_type_id', $libraryType->id)
             ->first();
     }
 

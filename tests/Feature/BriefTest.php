@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Brief;
 use App\Models\Budget;
+use App\Models\Calculation;
 use App\Models\CatalogService;
 use App\Models\ExtraFee;
 use App\Models\ServiceCategory;
@@ -270,6 +271,36 @@ class BriefTest extends TestCase
         $this->assertCount(2, data_get($estimate, 'selected_extra_fees'));
         $this->assertSame(195, data_get($estimate, 'selected_extra_fees.0.amount'));
         $this->assertSame(162.5, data_get($estimate, 'selected_extra_fees.1.amount'));
+    }
+
+    public function test_brief_uses_the_commercial_service_calculation_when_no_technical_calculation_exists(): void
+    {
+        $this->seed(ServiceCatalogSeeder::class);
+
+        $service = CatalogService::query()
+            ->where('name', 'Mini Web')
+            ->whereHas('subcategory.category', fn ($query) => $query->where('type', 'A_SERVICIOS'))
+            ->with('items.options')
+            ->firstOrFail();
+        $libraryItem = $service->items->firstWhere('name', 'Biblioteca');
+        $hostingItem = $service->items->firstWhere('name', 'Hosting y Dominio');
+
+        Calculation::query()
+            ->whereHas('service.subcategory.category', fn ($query) => $query->where('type', 'B_EQUIPO'))
+            ->whereHas('service', fn ($query) => $query->where('name', 'Mini Web'))
+            ->whereHas('libraryType', fn ($query) => $query->where('name', 'Pro'))
+            ->firstOrFail()
+            ->update(['catalog_service_id' => $service->id]);
+
+        $this->post(route('brief.update'), $this->payload($service, [
+            (string) $hostingItem->id => $hostingItem->options->first()->id,
+            (string) $libraryItem->id => $libraryItem->options->firstWhere('name', 'Pro')->id,
+        ]));
+
+        $estimate = Brief::query()->latest('id')->firstOrFail()->data['technical_estimate'];
+
+        $this->assertSame('calculated', data_get($estimate, 'status'));
+        $this->assertSame(799.5, data_get($estimate, 'budget.technical_base'));
     }
 
     public function test_brief_rejects_multiple_services_from_the_same_subcategory(): void
