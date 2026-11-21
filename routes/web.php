@@ -9,6 +9,7 @@ use App\Http\Controllers\ClientDemoController;
 use App\Http\Controllers\ClientInvoiceController;
 use App\Http\Controllers\ClientTicketController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PublicMediaController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -18,6 +19,10 @@ Route::get('/', function () {
         ? redirect()->route('dashboard')
         : redirect()->route('login');
 });
+
+Route::get('/media/{path}', [PublicMediaController::class, 'show'])
+    ->where('path', '.*')
+    ->name('media.show');
 
 Route::get('/dashboard', function () {
     return view('dashboard');

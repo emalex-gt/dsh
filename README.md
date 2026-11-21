@@ -127,6 +127,12 @@ php artisan serve
 
 Compiled Vite assets are versioned in `public/build` to support deployment environments where Node.js is not available at runtime.
 
+### Plesk Git deployment and uploads
+
+Public images uploaded from the administration panel remain in `storage/app/public` and Laravel serves them through `/media/...`, not through Laravel's `public/storage` symbolic link. This works with Plesk Git deployments on shared hosting, where symbolic links may be unavailable or removed during deployment.
+
+After deployment, add `php artisan config:clear` as an additional deployment action in Plesk. Ensure that the web-server user can write to `storage/app/public`; existing uploaded files stay in that directory and do not need to be copied or versioned in Git.
+
 ## AI-Assisted Development
 
 OpenAI Codex and ChatGPT are used as part of the development workflow for implementation support, debugging, refactoring, technical investigation, and documentation. Architecture, code review, validation, testing, and final technical decisions remain developer responsibilities.
