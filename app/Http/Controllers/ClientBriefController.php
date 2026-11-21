@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreClientBriefRequest;
+use App\Mail\NewBriefReceived;
 use App\Models\Brief;
 use App\Models\Calculation;
 use App\Models\CatalogService;
@@ -11,6 +12,7 @@ use App\Services\BriefEstimateConfirmationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 
 class ClientBriefController extends Controller
@@ -54,6 +56,8 @@ class ClientBriefController extends Controller
         }
 
         $pending = $confirmationService->createPending($request->validatedBriefData());
+
+        Mail::to(config('mail.brief_recipient'))->send(new NewBriefReceived($pending['brief']));
 
         return redirect()->route('brief.review', $pending['token']);
     }

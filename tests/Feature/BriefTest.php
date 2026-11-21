@@ -7,11 +7,13 @@ use App\Models\Budget;
 use App\Models\CatalogService;
 use App\Models\ExtraFee;
 use App\Models\ServiceCategory;
+use App\Mail\NewBriefReceived;
 use Database\Seeders\ServiceCatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class BriefTest extends TestCase
@@ -71,6 +73,32 @@ class BriefTest extends TestCase
         $this->assertSame(8.38, data_get($brief->data, 'technical_estimate.budget.selected_services_tax'));
         $this->assertSame(1372.4, data_get($brief->data, 'technical_estimate.budget.estimated_total'));
         $this->assertCount(0, data_get($brief->data, 'technical_estimate.selected_extra_fees'));
+    }
+
+    public function test_new_brief_sends_an_email_notification_to_the_dsh_team(): void
+    {
+        Mail::fake();
+        $this->seed(ServiceCatalogSeeder::class);
+
+        $service = CatalogService::query()
+            ->where('name', 'Mini Web')
+            ->whereHas('subcategory.category', fn ($query) => $query->where('type', 'A_SERVICIOS'))
+            ->with('items.options')
+            ->firstOrFail();
+
+        $hostingItem = $service->items->firstWhere('name', 'Hosting y Dominio');
+        $libraryItem = $service->items->firstWhere('name', 'Biblioteca');
+
+        $this->post(route('brief.update'), $this->payload($service, [
+            (string) $hostingItem->id => $hostingItem->options->first()->id,
+            (string) $libraryItem->id => $libraryItem->options->first()->id,
+        ]))->assertRedirect();
+
+        $brief = Brief::query()->latest('id')->firstOrFail();
+
+        Mail::assertSent(NewBriefReceived::class, function (NewBriefReceived $mail) use ($brief): bool {
+            return $mail->hasTo('info@dshcompany.com') && $mail->brief->is($brief);
+        });
     }
 
     public function test_brief_accepts_current_website_without_a_protocol(): void

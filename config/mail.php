@@ -115,4 +115,6 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
+    'brief_recipient' => env('BRIEF_NOTIFICATION_RECIPIENT', 'info@dshcompany.com'),
+
 ];
