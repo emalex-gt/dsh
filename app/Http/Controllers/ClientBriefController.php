@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
+use Throwable;
 
 class ClientBriefController extends Controller
 {
@@ -57,7 +58,11 @@ class ClientBriefController extends Controller
 
         $pending = $confirmationService->createPending($request->validatedBriefData());
 
-        Mail::to(config('mail.brief_recipient'))->send(new NewBriefReceived($pending['brief']));
+        try {
+            Mail::to(config('mail.brief_recipient'))->send(new NewBriefReceived($pending['brief']));
+        } catch (Throwable $exception) {
+            report($exception);
+        }
 
         return redirect()->route('brief.review', $pending['token']);
     }

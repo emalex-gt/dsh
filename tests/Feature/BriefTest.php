@@ -14,6 +14,7 @@ use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
+use RuntimeException;
 use Tests\TestCase;
 
 class BriefTest extends TestCase
@@ -99,6 +100,28 @@ class BriefTest extends TestCase
         Mail::assertSent(NewBriefReceived::class, function (NewBriefReceived $mail) use ($brief): bool {
             return $mail->hasTo('info@dshcompany.com') && $mail->brief->is($brief);
         });
+    }
+
+    public function test_brief_submission_continues_when_the_email_notification_fails(): void
+    {
+        $this->seed(ServiceCatalogSeeder::class);
+        Mail::shouldReceive('to')->once()->andThrow(new RuntimeException('Servicio de correo no disponible.'));
+
+        $service = CatalogService::query()
+            ->where('name', 'Mini Web')
+            ->whereHas('subcategory.category', fn ($query) => $query->where('type', 'A_SERVICIOS'))
+            ->with('items.options')
+            ->firstOrFail();
+        $hostingItem = $service->items->firstWhere('name', 'Hosting y Dominio');
+        $libraryItem = $service->items->firstWhere('name', 'Biblioteca');
+
+        $response = $this->post(route('brief.update'), $this->payload($service, [
+            (string) $hostingItem->id => $hostingItem->options->first()->id,
+            (string) $libraryItem->id => $libraryItem->options->first()->id,
+        ]));
+
+        $response->assertRedirect();
+        $this->assertDatabaseCount('briefs', 1);
     }
 
     public function test_brief_accepts_current_website_without_a_protocol(): void
